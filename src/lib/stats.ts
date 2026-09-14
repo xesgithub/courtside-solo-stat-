@@ -49,7 +49,7 @@ function emptyLine(playerId: string): PlayerLine {
   };
 }
 
-function applyEvent(line: PlayerLine, kind: StatKind): void {
+function applyEvent(line: PlayerLine, kind: StatKind, points = 0): void {
   switch (kind) {
     case 'FG2_MAKE':
       line.fg2m += 1;
@@ -89,6 +89,10 @@ function applyEvent(line: PlayerLine, kind: StatKind): void {
     case 'PF':
       line.pf += 1;
       break;
+    case 'PTS_ADJ':
+      // ปรับแต้มทีมแบบเร็ว (ไม่ระบุตัว) — บวก/ลบเข้าคะแนนอย่างเดียว
+      line.pts += points;
+      break;
   }
 }
 
@@ -113,10 +117,12 @@ export function computeBoxScore(players: Player[], events: StatEvent[]): BoxScor
 
   for (const ev of events) {
     if (ev.isTeam || !ev.playerId) {
-      applyEvent(teamLine, ev.kind);
+      applyEvent(teamLine, ev.kind, ev.points ?? 0);
     } else {
       const line = byId.get(ev.playerId);
-      if (line) applyEvent(line, ev.kind);
+      // ถ้าผู้เล่นถูกลบออกจากรายชื่อไปแล้ว (orphaned event) ให้ตกไปรวมใน "Team"
+      // เพื่อไม่ให้แต้ม/สถิติที่จดไว้หายจากบ็อกซ์สกอร์และคะแนนรวม
+      applyEvent(line ?? teamLine, ev.kind, ev.points ?? 0);
     }
   }
 
@@ -137,7 +143,8 @@ export function computeBoxScore(players: Player[], events: StatEvent[]): BoxScor
     totals.pf += l.pf;
   });
 
-  return { lines, teamLine, totals, teamScore: totals.pts };
+  // กันแต้มทีมติดลบ (เช่นกดปรับแต้ม −1 รัวเกิน) — แต้มบาสไม่ควรน้อยกว่า 0
+  return { lines, teamLine, totals, teamScore: Math.max(0, totals.pts) };
 }
 
 /** คะแนนรวมของคู่แข่ง = ผลรวม delta ของ opponentEvents + PF ของทีมเรา (ฟาวล์ -> คู่แข่ง +1) */

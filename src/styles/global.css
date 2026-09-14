@@ -59,16 +59,17 @@ button {
 
 /* ---------- App shell ---------- */
 .app-shell {
-  min-height: 100%;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-.app-header {
+.topbar {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
+  gap: 16px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--border);
   background: var(--bg-elev);
   position: sticky;
@@ -76,10 +77,368 @@ button {
   z-index: 10;
 }
 
+/* นาฬิกากลาง TopBar */
+.topbar__clock {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+.topbar__clock-q {
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+.topbar__clock-time {
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  min-width: 96px;
+  text-align: center;
+}
+.topbar__clock-controls {
+  display: flex;
+  gap: 6px;
+}
+
+.topbar__right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.autosaved {
+  font-size: 11px;
+  color: var(--make);
+  white-space: nowrap;
+}
+
+.tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px;
+}
+.tab {
+  border-radius: 999px;
+  padding: 6px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+  transition: background 0.12s, color 0.12s;
+  white-space: nowrap;
+}
+.tab--active {
+  background: var(--team);
+  color: #1a1206;
+}
+
+.clk-btn {
+  border-radius: var(--radius-xs);
+  padding: 6px 12px;
+  font-weight: 700;
+  font-size: 13px;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  transition: filter 0.12s, transform 0.05s;
+}
+.clk-btn:active {
+  transform: scale(0.97);
+}
+.clk-btn:hover {
+  filter: brightness(1.12);
+}
+.clk-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+  filter: none;
+  transform: none;
+}
+.topbar__clock-edit:disabled {
+  cursor: default;
+  opacity: 0.7;
+}
+.clk-btn--primary {
+  background: var(--make);
+  color: #06251a;
+  border-color: transparent;
+  min-width: 74px;
+}
+.clk-btn--primary.running {
+  background: var(--foul);
+  color: #2a0d0d;
+}
+
+/* ---------- Score panel (คอลัมน์ขวา) ---------- */
+.score-panel {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: start;
+  gap: 10px;
+  text-align: center;
+}
+.score-panel__side {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 0;
+}
+.score-panel__name {
+  font-size: 14px;
+  font-weight: 800;
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.score-panel__name.team {
+  color: var(--team);
+}
+.score-panel__name.opp {
+  color: var(--opp);
+}
+.score-panel__score {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 68px;
+  padding: 6px 8px;
+  font-size: 40px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+}
+.score-panel__score.team {
+  color: var(--team);
+}
+.score-panel__score.opp {
+  color: var(--opp);
+}
+.score-panel__vs {
+  align-self: center;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+/* กล่องคะแนน = ปุ่ม − | เลข | ปุ่ม + เรียงแนวนอน มีกรอบล้อม */
+.score-panel__score-box {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  border: 2px solid var(--border);
+  border-radius: var(--radius-sm);
+  overflow: hidden;
+  background: var(--bg-elev-2);
+}
+.score-panel__score-box.team {
+  border-color: rgba(255, 122, 26, 0.5);
+}
+.score-panel__score-box.opp {
+  border-color: rgba(167, 139, 250, 0.5);
+}
+
+.adj-btn {
+  font-size: 26px;
+  font-weight: 800;
+  min-width: 52px;
+  padding: 0 16px;
+  line-height: 1;
+  border: none;
+  background: transparent;
+  transition: filter 0.12s, transform 0.05s;
+}
+.adj-btn:active {
+  transform: scale(0.94);
+}
+.adj-btn:hover {
+  filter: brightness(1.15);
+}
+/* ทีมเรา = ส้ม */
+.adj-btn.team {
+  background: var(--team-soft);
+  color: var(--team);
+}
+.adj-btn--plus.team {
+  background: var(--team);
+  color: #1a1206;
+}
+/* คู่แข่ง = ม่วง */
+.adj-btn.opp {
+  background: var(--opp-soft);
+  color: var(--opp);
+}
+.adj-btn--plus.opp {
+  background: var(--opp);
+  color: #1a1030;
+}
+
+/* ---------- Event log ---------- */
+.event-log {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.event-log__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.event-log__count {
+  font-size: 11px;
+  color: var(--text-faint);
+}
+.event-log__empty {
+  font-size: 13px;
+  color: var(--text-faint);
+  text-align: center;
+  padding: 8px 0;
+}
+.event-log__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.event-log__item {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-elev-2);
+  font-size: 12px;
+}
+.event-log__head-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.event-log__more {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--text-dim);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 12px;
+  background: var(--bg-elev-2);
+  transition: filter 0.12s, color 0.12s;
+}
+.event-log__more:hover:not(:disabled) {
+  color: var(--text);
+  filter: brightness(1.15);
+}
+.event-log__more:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+.event-log__del {
+  width: 20px;
+  height: 20px;
+  border-radius: var(--radius-xs);
+  background: var(--foul-soft);
+  border: 1px solid rgba(248, 113, 113, 0.35);
+  color: var(--foul);
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1;
+  padding: 0;
+  transition: filter 0.12s, transform 0.05s;
+}
+.event-log__del:hover {
+  filter: brightness(1.2);
+}
+.event-log__del:active {
+  transform: scale(0.9);
+}
+
+/* ---------- All events modal ---------- */
+.modal--events {
+  max-width: 480px;
+  max-height: 82vh;
+  display: flex;
+  flex-direction: column;
+}
+.allevents-list {
+  list-style: none;
+  margin: 0 0 14px;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  overflow-y: auto;
+  min-height: 0;
+}
+.allevents-item {
+  display: grid;
+  grid-template-columns: auto auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-elev-2);
+  font-size: 13px;
+}
+.allevents-item__time {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.allevents-item__label {
+  font-weight: 700;
+  white-space: nowrap;
+}
+.allevents-item__who {
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+}
+.allevents-item__locked {
+  font-size: 12px;
+  opacity: 0.6;
+}
+.event-log__label {
+  font-weight: 700;
+}
+.event-log__who {
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.event-log__time {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: 10px;
+  background: none;
+  border: none;
+  padding: 0;
+  text-align: left;
+  cursor: pointer;
+  transition: filter 0.12s, transform 0.05s;
+}
+.brand:hover {
+  filter: brightness(1.1);
+}
+.brand:active {
+  transform: scale(0.98);
 }
 
 .brand__logo {
@@ -123,15 +482,46 @@ button {
 .live {
   flex: 1;
   display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
-  gap: 14px;
-  padding: 14px;
-  align-items: start;
+  grid-template-columns: 1.4fr 1fr;
+  gap: 12px;
+  padding: 12px;
+  align-items: stretch;
+  min-height: 0;
 }
 
-@media (max-width: 900px) {
+.live__players {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  border-left: 3px solid var(--team);
+}
+
+.live__right {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-height: 0;
+}
+
+/* score บน (คงที่), event log กลาง (คงที่), action ล่าง (ยืด) */
+.live__score {
+  flex: 0 0 auto;
+}
+.live__events {
+  flex: 0 0 auto;
+  padding: 10px;
+}
+.live__actions {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+@media (max-width: 700px) {
   .live {
     grid-template-columns: 1fr;
+    overflow-y: auto;
   }
 }
 
@@ -139,7 +529,7 @@ button {
   background: var(--bg-elev);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 14px;
+  padding: 12px;
 }
 
 .panel__head {
@@ -157,7 +547,7 @@ button {
 }
 
 .team-name {
-  font-size: 20px;
+  font-size: 16px;
   font-weight: 800;
   margin: 0;
 }
@@ -169,20 +559,28 @@ button {
   color: var(--opp);
 }
 
-/* ---------- Player list ---------- */
-.player-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
+/* ---------- Player grid ---------- */
+.player-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+  grid-auto-rows: minmax(78px, 1fr);
+  gap: 10px;
+  min-height: 0;
+  overflow-y: auto;
+  align-content: start;
+  padding-right: 2px;
 }
 
 .player-card {
+  position: relative;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 12px;
-  width: 100%;
-  text-align: left;
-  padding: 10px 12px;
+  justify-content: center;
+  gap: 4px;
+  text-align: center;
+  padding: 12px 10px;
   border-radius: var(--radius-sm);
   background: var(--bg-elev-2);
   border: 1px solid transparent;
@@ -190,7 +588,10 @@ button {
 }
 
 .player-card:active {
-  transform: scale(0.99);
+  transform: scale(0.98);
+}
+.player-card:hover {
+  border-color: var(--border);
 }
 
 .player-card.selected {
@@ -198,46 +599,105 @@ button {
   border-color: var(--team);
 }
 
+.player-card__star {
+  position: absolute;
+  top: 6px;
+  right: 8px;
+  font-size: 11px;
+  color: var(--text-faint);
+}
+
 .player-card__num {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 800;
-  min-width: 44px;
-  text-align: center;
   color: var(--team);
   font-variant-numeric: tabular-nums;
+  line-height: 1;
 }
 
-.player-card__body {
-  flex: 1;
-  min-width: 0;
-}
-
+/* ชื่อ = ขาว ใหญ่ เด่น (คนละสีกับเบอร์ส้มและแต้มเขียว) */
 .player-card__name {
-  font-weight: 700;
-  font-size: 15px;
+  font-weight: 800;
+  font-size: 20px;
+  color: var(--text);
+  max-width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* แต้ม = เขียว (คนละสีกับเบอร์/ชื่อ) */
+.player-card__pts {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+.player-card__pts b {
+  color: var(--make);
+  font-size: 16px;
 }
 
 .player-card__stats {
-  font-size: 12px;
-  color: var(--text-dim);
-  margin-top: 2px;
-}
-
-.player-card__stats b {
-  color: var(--text);
-  font-weight: 700;
-}
-
-.player-card__star {
-  font-size: 11px;
+  display: flex;
+  gap: 8px;
+  font-size: 10px;
   color: var(--text-faint);
+  white-space: nowrap;
+}
+.player-card__stats b {
+  color: var(--make);
+  font-size: 12px;
+}
+
+/* จุดจับสำหรับลากสลับตำแหน่ง */
+.player-card__grip {
+  position: absolute;
+  top: 6px;
+  left: 8px;
+  font-size: 12px;
+  color: var(--text-faint);
+  opacity: 0.5;
+}
+.player-card {
+  cursor: grab;
+  touch-action: none; /* กันเบราว์เซอร์แย่ง gesture ไป scroll ตอนลากบนทัช */
+  user-select: none;
+  -webkit-user-select: none;
+}
+.player-card.dragging {
+  opacity: 0.4;
+  cursor: grabbing;
+}
+.player-card.drop-target {
+  border-color: var(--make);
+  box-shadow: inset 0 0 0 2px var(--make-soft);
+}
+
+/* toggle โหมดสถิติบนการ์ด */
+.statmode-toggle {
+  display: flex;
+  gap: 2px;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 2px;
+}
+.statmode-btn {
+  border-radius: 999px;
+  padding: 3px 10px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+.statmode-btn--active {
+  background: var(--team);
+  color: #1a1206;
 }
 
 /* ---------- Center: scoreboard ---------- */
 .center-col {
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 12px;
 }
 
 .scoreboard {
@@ -254,7 +714,7 @@ button {
 }
 
 .scoreboard__score {
-  font-size: 46px;
+  font-size: 34px;
   font-weight: 800;
   line-height: 1;
   font-variant-numeric: tabular-nums;
@@ -276,20 +736,20 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 12px;
+  gap: 6px;
+  padding: 10px;
   background: var(--bg-elev-2);
   border-radius: var(--radius-sm);
 }
 
 .clock__q {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--text-dim);
   letter-spacing: 0.1em;
 }
 
 .clock__time {
-  font-size: 40px;
+  font-size: 30px;
   font-weight: 800;
   font-variant-numeric: tabular-nums;
   letter-spacing: 0.02em;
@@ -330,53 +790,121 @@ button {
   width: 100%;
 }
 
-/* ---------- Action pad ---------- */
-.action-pad__hint {
-  text-align: center;
-  color: var(--text-dim);
-  font-size: 14px;
-  padding: 22px 8px;
+/* ---------- Action pad (ทาง A: โชว์ปุ่มเสมอ) ---------- */
+.action-pad {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 
 .action-selected {
   display: flex;
   align-items: center;
-  justify-content: space-between;
+  gap: 10px;
   margin-bottom: 10px;
+  min-height: 26px;
 }
 .action-selected__who {
   font-weight: 800;
-  font-size: 16px;
+  font-size: 18px;
+  white-space: nowrap;
+  flex: 0 0 auto;
 }
 .action-selected__who .num {
   color: var(--team);
 }
+.action-selected__hint {
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+/* ปุ่มรองที่เกิดบ่อย (REB/AST/STL/BLK) ข้างชื่อผู้เล่นใน ActionPad */
+.action-quick {
+  flex: 1;
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+.action-quick__btn {
+  flex: 1;
+  max-width: 84px;
+  padding: 14px 0;
+  border-radius: var(--radius-sm);
+  background: var(--neutral-soft);
+  border: 1px solid var(--border);
+  font-size: 16px;
+  font-weight: 800;
+  transition: filter 0.12s, transform 0.05s;
+}
+.action-quick__btn:active {
+  transform: scale(0.94);
+}
+.action-quick__btn:hover {
+  filter: brightness(1.15);
+}
+
+.action-groups {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  overflow-y: auto;
+}
+.action-groups--disabled {
+  opacity: 0.4;
+}
 
 .action-grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
+  gap: 6px;
+}
+/* ปุ่มยิงหลัก: แถวละ 2 ปุ่มใหญ่ กดบ่อย */
+.action-grid--primary {
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: minmax(60px, 1fr);
+  flex: 0 0 auto;
+}
+/* ปุ่มรอง: แถวละ 3 */
+.action-grid--secondary {
+  grid-template-columns: repeat(3, 1fr);
+  grid-auto-rows: minmax(44px, 1fr);
+  flex: 1;
+}
+.action-btn:disabled {
+  cursor: default;
 }
 
 .action-btn {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
-  gap: 2px;
-  padding: 14px 14px;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  padding: 6px 8px;
   border-radius: var(--radius-sm);
   background: var(--neutral-soft);
   border: 1px solid var(--border);
-  min-height: 58px;
-  justify-content: center;
+  min-height: 0;
+  text-align: center;
 }
 .action-btn__label {
   font-weight: 800;
   font-size: 15px;
+  line-height: 1.1;
 }
 .action-btn__sub {
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
+  line-height: 1.1;
+}
+/* ปุ่มยิงหลัก: ตัวอักษรใหญ่ขึ้น เด่นขึ้น */
+.action-btn--primary .action-btn__label {
+  font-size: 22px;
+}
+.action-btn--primary .action-btn__sub {
+  font-size: 13px;
 }
 .action-btn.make {
   background: var(--make-soft);
@@ -401,11 +929,11 @@ button {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
-  padding: 8px 0;
+  gap: 12px;
+  padding: 6px 0;
 }
 .opp-score__big {
-  font-size: 64px;
+  font-size: 44px;
   font-weight: 800;
   color: var(--opp);
   line-height: 1;
@@ -418,9 +946,9 @@ button {
 }
 .opp-btn {
   flex: 1;
-  font-size: 26px;
+  font-size: 22px;
   font-weight: 800;
-  padding: 18px 0;
+  padding: 12px 0;
   border-radius: var(--radius-sm);
   background: var(--opp-soft);
   border: 1px solid rgba(167, 139, 250, 0.4);
@@ -527,4 +1055,677 @@ button {
 .modal__actions {
   display: flex;
   gap: 8px;
+}
+
+/* ---------- Box Score page ---------- */
+.boxpage {
+  position: relative;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  min-height: 0;
+  overflow: hidden; /* พยายามให้พอดีหน้าเดียว ไม่เลื่อน */
+}
+
+/* toolbar (ปุ่ม share) — ลอยมุมขวาบน ไม่กินความสูงของ layout กันตารางตกหน้า */
+.box-toolbar {
+  position: absolute;
+  top: 14px;
+  right: 16px;
+  z-index: 5;
+  display: flex;
+  justify-content: flex-end;
+}
+.box-share {
+  flex: 0 0 auto;
+  padding: 5px 14px;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.35);
+  transition: filter 0.12s, transform 0.05s, color 0.12s;
+}
+.box-share:hover {
+  filter: brightness(1.15);
+  color: var(--text);
+}
+.box-share:active {
+  transform: scale(0.94);
+}
+.box-share:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+/* พื้นที่ที่จะ capture เป็นรูป (summary + ตาราง) */
+.box-capture {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 0;
+}
+
+.box-summary {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  gap: 12px;
+  text-align: center;
+  flex: 0 0 auto;
+  padding: 10px 12px;
+}
+.box-summary__label {
+  font-size: 10px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+}
+.box-summary__name {
+  font-size: 16px;
+  font-weight: 800;
+  margin-top: 1px;
+}
+.box-summary__name.team {
+  color: var(--team);
+}
+.box-summary__name.opp {
+  color: var(--opp);
+}
+.box-summary__score {
+  font-size: 44px;
+  font-weight: 800;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  margin-top: 2px;
+}
+.box-summary__score.team {
+  color: var(--team);
+}
+.box-summary__score.opp {
+  color: var(--opp);
+}
+.box-summary__mid {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.box-summary__q {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.box-summary__vs {
+  font-size: 10px;
+  letter-spacing: 0.16em;
+  color: var(--text-faint);
+}
+
+.full-box {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  padding: 10px 12px;
+}
+.full-box .panel__head {
+  margin-bottom: 6px;
+}
+.full-box__scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+.full-box table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+.full-box thead th {
+  position: sticky;
+  top: 0;
+  background: var(--bg-elev);
+  z-index: 1;
+}
+.full-box th,
+.full-box td {
+  padding: 5px 6px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.full-box th {
+  color: var(--text-faint);
+  font-weight: 600;
+  border-bottom: 1px solid var(--border);
+}
+.full-box td.name,
+.full-box th.name {
+  text-align: left;
+}
+.full-box td.pct {
+  color: var(--text-dim);
+}
+.full-box tr.totals td {
+  border-top: 1px solid var(--border);
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* ---------- iPad / responsive ---------- */
+@media (max-width: 1024px) {
+  .player-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 820px) {
+  .topbar {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .topbar__game {
+    order: 3;
+    flex-basis: 100%;
+  }
+  .player-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* ---------- Review placeholder ---------- */
+.review-placeholder {
+  flex: 1;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+.review-placeholder__card {
+  max-width: 460px;
+  text-align: center;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px 24px;
+}
+.review-placeholder__title {
+  font-size: 20px;
+  font-weight: 800;
+  margin-bottom: 10px;
+}
+.review-placeholder__text {
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.7;
+  margin: 0 0 14px;
+}
+.review-placeholder__meta {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+
+/* ---------- Live head tools (edit team + toggle) ---------- */
+.live__head-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+.live__head-left .panel__label {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.live__head-left .edit-team-btn {
+  flex: 0 0 auto;
+}
+.edit-team-btn {
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  transition: filter 0.12s, transform 0.05s;
+}
+.edit-team-btn:active {
+  transform: scale(0.97);
+}
+.edit-team-btn:hover:not(:disabled) {
+  filter: brightness(1.15);
+  color: var(--text);
+}
+.edit-team-btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* ---------- Finish / lock game (ปุ่มบน TopBar) ---------- */
+.finish-btn {
+  border-radius: var(--radius-xs);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+  background: var(--foul-soft);
+  border: 1px solid rgba(248, 113, 113, 0.45);
+  color: var(--foul);
+  transition: filter 0.12s, transform 0.05s;
+}
+.finish-btn:active {
+  transform: scale(0.99);
+}
+.finish-btn:hover {
+  filter: brightness(1.12);
+}
+.finish-btn--reopen {
+  background: var(--make-soft);
+  border-color: rgba(52, 211, 153, 0.45);
+  color: var(--make);
+}
+
+.live__actions--locked {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.game-locked {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  padding: 12px;
+}
+.game-locked__title {
+  font-size: 20px;
+  font-weight: 800;
+}
+.game-locked__text {
+  font-size: 13px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  max-width: 320px;
+}
+
+/* ---------- Team / roster edit modal ---------- */
+.modal--edit {
+  max-width: 520px;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+}
+.edit-teams {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.edit-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.edit-field__label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.edit-field__label.team {
+  color: var(--team);
+}
+.edit-field__label.opp {
+  color: var(--opp);
+}
+
+.edit-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 600;
+}
+.edit-input:focus {
+  outline: none;
+  border-color: var(--team);
+}
+
+.edit-roster {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  gap: 8px;
+}
+.edit-roster__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+.edit-roster__list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow-y: auto;
+  max-height: 44vh;
+  padding-right: 2px;
+}
+
+.edit-row {
+  display: grid;
+  grid-template-columns: 72px 1fr auto;
+  gap: 8px;
+  align-items: center;
+}
+.edit-input--num {
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+.edit-input--name {
+  min-width: 0;
+}
+.edit-remove {
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-xs);
+  background: var(--foul-soft);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: var(--foul);
+  font-size: 15px;
+  font-weight: 800;
+  transition: filter 0.12s, transform 0.05s;
+}
+.edit-remove:active {
+  transform: scale(0.94);
+}
+.edit-remove:hover {
+  filter: brightness(1.15);
+}
+
+.edit-row--add {
+  margin-top: 4px;
+  padding-top: 12px;
+  border-top: 1px dashed var(--border);
+}
+.edit-add {
+  padding: 0 16px;
+  height: 38px;
+  border-radius: var(--radius-xs);
+  background: var(--make-soft);
+  border: 1px solid rgba(52, 211, 153, 0.4);
+  color: var(--make);
+  font-weight: 800;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: filter 0.12s, transform 0.05s;
+}
+.edit-add:active {
+  transform: scale(0.97);
+}
+.edit-add:hover {
+  filter: brightness(1.12);
+}
+
+@media (max-width: 520px) {
+  .edit-teams {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Archived game banner (Box Score) ---------- */
+.archived-banner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--opp-soft);
+  border: 1px solid rgba(167, 139, 250, 0.4);
+  font-size: 13px;
+  color: var(--text);
+}
+.archived-banner b {
+  color: var(--opp);
+}
+.archived-banner__time {
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---------- History page ---------- */
+.historypage {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 14px;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
+.history-empty {
+  padding: 24px 12px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 14px;
+  line-height: 1.7;
+}
+.history-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.history-item {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+.history-item__main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  transition: border-color 0.12s, filter 0.12s, transform 0.05s;
+}
+.history-item__main:hover {
+  border-color: var(--team);
+  filter: brightness(1.05);
+}
+.history-item__main:active {
+  transform: scale(0.995);
+}
+.history-item__info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+  text-align: left;
+}
+.history-item__matchup {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 15px;
+  font-weight: 700;
+  min-width: 0;
+}
+.history-item__matchup .team {
+  color: var(--team);
+}
+.history-item__matchup .opp {
+  color: var(--opp);
+}
+.history-item__vs {
+  font-size: 11px;
+  color: var(--text-faint);
+  font-weight: 600;
+}
+.history-item__meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--text-faint);
+}
+.history-item__badge {
+  color: var(--make);
+}
+.history-item__score {
+  font-size: 22px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  color: var(--text);
+}
+.history-item__score.win {
+  color: var(--make);
+}
+.history-item__score.loss {
+  color: var(--foul);
+}
+.history-item__dash {
+  color: var(--text-faint);
+  margin: 0 2px;
+}
+.history-item__del {
+  flex: 0 0 auto;
+  width: 46px;
+  border-radius: var(--radius-sm);
+  background: var(--foul-soft);
+  border: 1px solid rgba(248, 113, 113, 0.4);
+  color: var(--foul);
+  font-size: 16px;
+  transition: filter 0.12s, transform 0.05s;
+}
+.history-item__del:hover {
+  filter: brightness(1.15);
+}
+.history-item__del:active {
+  transform: scale(0.94);
+}
+
+/* ---------- Clock (กดที่นาฬิกาเพื่อแก้เวลา/quarter) ---------- */
+.topbar__clock-edit {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 4px 10px;
+  border-radius: var(--radius-xs);
+  background: none;
+  border: 1px solid transparent;
+  transition: background 0.12s, border-color 0.12s;
+}
+.topbar__clock-edit:hover {
+  background: var(--bg-elev-2);
+  border-color: var(--border);
+}
+.topbar__clock-pencil {
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+/* ---------- Clock edit modal ---------- */
+.modal--clock {
+  max-width: 360px;
+}
+.clockedit-field {
+  margin-bottom: 16px;
+}
+.clockedit-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-faint);
+  margin-bottom: 8px;
+}
+.clockedit-qrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.clockedit-step {
+  width: 42px;
+  height: 42px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-elev-3);
+  border: 1px solid var(--border);
+  font-size: 22px;
+  font-weight: 800;
+  transition: filter 0.12s, transform 0.05s;
+}
+.clockedit-step:hover {
+  filter: brightness(1.15);
+}
+.clockedit-step:active {
+  transform: scale(0.94);
+}
+.clockedit-qval {
+  font-size: 24px;
+  font-weight: 800;
+  min-width: 52px;
+  text-align: center;
+  color: var(--team);
+}
+.clockedit-qhint {
+  font-size: 12px;
+  color: var(--text-faint);
+}
+.clockedit-timerow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.clockedit-time {
+  width: 72px;
+  text-align: center;
+  font-size: 24px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+.clockedit-colon {
+  font-size: 24px;
+  font-weight: 800;
+}
+.clockedit-unit {
+  font-size: 12px;
+  color: var(--text-faint);
+  margin-left: 4px;
+}
+.clockedit-note {
+  font-size: 12px;
+  color: var(--text-dim);
+  line-height: 1.6;
+  background: var(--bg-elev-2);
+  border-radius: var(--radius-xs);
+  padding: 10px 12px;
+  margin: 0 0 16px;
 }

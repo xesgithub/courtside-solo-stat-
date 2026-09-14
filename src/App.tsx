@@ -1,29 +1,345 @@
-import { useMemo } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { TopBar, type Tab } from './components/TopBar';
 import { LivePage } from './components/LivePage';
-import { createMockGame } from './lib/mock';
+import { BoxScorePage } from './components/BoxScorePage';
+import { ReviewPage } from './components/ReviewPage';
+import { createMockGame, uid } from './lib/mock';
+import { computeBoxScore, computeOpponentScore } from './lib/stats';
+import {
+  loadGame,
+  saveGame,
+  loadSavedGames,
+  archiveGame,
+  deleteSavedGame,
+} from './lib/storage';
+import type { Game, Player, StatEvent } from './types';
 
 export default function App() {
-  const mockGame = useMemo(() => createMockGame(), []);
+  const [game, setGame] = useState<Game>(() => loadGame() ?? createMockGame());
+  const [tab, setTab] = useState<Tab>('live');
+  const [saved, setSaved] = useState(false);
+  const [savedGames, setSavedGames] = useState<Game[]>(() => loadSavedGames());
+  // id ของเกมเก่าที่กำลังเปิดดู (null = กำลังดูเกมปัจจุบัน)
+  const [viewingId, setViewingId] = useState<string | null>(null);
+  const saveTimer = useRef<number | null>(null);
+
+  // เกมที่กำลังเปิดดูอยู่: ถ้าเลือกเกมเก่าให้ใช้ตัวนั้น ไม่งั้นใช้เกมปัจจุบัน
+  const viewingGame =
+    (viewingId && savedGames.find((g) => g.id === viewingId)) || game;
+  const isViewingArchived = !!viewingId;
+
+  const box = useMemo(
+    () => computeBoxScore(viewingGame.players, viewingGame.events),
+    [viewingGame.players, viewingGame.events],
+  );
+  const opponentScore = useMemo(
+    () => computeOpponentScore(viewingGame),
+    [viewingGame],
+  );
+
+  // auto-save ลง localStorage — เขียน "ทันที" ทุกครั้งที่ game เปลี่ยน
+  // (localStorage.setItem เร็วมาก ไม่ต้อง debounce; กัน race ตอน refresh เร็วๆ แล้วข้อมูลหาย)
+  useEffect(() => {
+    saveGame(game);
+    // โชว์ป้าย "Saved" แบบหน่วงสั้นๆ เพื่อความรู้สึก ไม่เกี่ยวกับการเขียนจริง
+    if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    saveTimer.current = window.setTimeout(() => setSaved(true), 300);
+    return () => {
+      if (saveTimer.current) window.clearTimeout(saveTimer.current);
+    };
+  }, [game]);
+
+  // เซฟทันทีตอนกำลังจะปิด/รีเฟรช กันข้อมูลหาย
+  useEffect(() => {
+    const handler = () => saveGame(game);
+    window.addEventListener('beforeunload', handler);
+    return () => window.removeEventListener('beforeunload', handler);
+  }, [game]);
+
+  // เดินนาฬิกาถอยหลังจริงตอน running = true
+  // คำนวณจาก timestamp จริง (deadline) ทุก tick กัน drift และเวลาเพี้ยนตอน tab ถูก throttle
+  useEffect(() => {
+    if (!game.clock.running) return;
+    const deadline = Date.now() + game.clock.remainingMs;
+    const id = window.setInterval(() => {
+      const left = deadline - Date.now();
+      setGame((g) => {
+        if (!g.clock.running) return g; // เผื่อถูกสั่งหยุดระหว่างทาง
+        if (left <= 0) {
+          // หมดเวลาควอเตอร์ -> หยุดที่ 0
+          return { ...g, clock: { ...g.clock, remainingMs: 0, running: false } };
+        }
+        return { ...g, clock: { ...g.clock, remainingMs: left } };
+      });
+    }, 200);
+    return () => window.clearInterval(id);
+    // ผูกกับ running เท่านั้น: เริ่มเดินใหม่เมื่อกด start/pause หรือรีเซ็ตเวลา
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.clock.running]);
+
+  function pushEvent(ev: Omit<StatEvent, 'id' | 'ts' | 'quarter' | 'clockMs'>) {
+    setGame((g) => ({
+      ...g,
+      events: [
+        ...g.events,
+        {
+          id: uid(),
+          ts: Date.now(),
+          quarter: g.clock.quarter,
+          clockMs: g.clock.remainingMs,
+          ...ev,
+        },
+      ],
+      updatedAt: Date.now(),
+    }));
+  }
+
+  function teamDelta(delta: number) {
+    // ปรับแต้มทีมเราแบบเร็ว: บันทึกเป็น event ไม่ระบุตัว (undo ได้ปกติ)
+    pushEvent({ kind: 'PTS_ADJ', isTeam: true, points: delta });
+  }
+
+  /** ลบ event ออกจาก log — box score/แต้มจะคำนวณใหม่ตามทันที */
+  function deleteEvent(id: string) {
+    setGame((g) => ({
+      ...g,
+      events: g.events.filter((e) => e.id !== id),
+      updatedAt: Date.now(),
+    }));
+  }
+
+  function opponentDelta(delta: number) {
+    setGame((g) => ({
+      ...g,
+      opponentEvents: [
+        ...g.opponentEvents,
+        {
+          id: uid(),
+          delta,
+          quarter: g.clock.quarter,
+          clockMs: g.clock.remainingMs,
+          ts: Date.now(),
+        },
+      ],
+      updatedAt: Date.now(),
+    }));
+  }
+
+  function reorderPlayers(fromId: string, toId: string) {
+    if (fromId === toId) return;
+    setGame((g) => {
+      const players = [...g.players];
+      const from = players.findIndex((p) => p.id === fromId);
+      const to = players.findIndex((p) => p.id === toId);
+      if (from < 0 || to < 0) return g;
+      // สลับตำแหน่งกัน (swap) — ตัวอื่นอยู่ที่เดิม
+      [players[from], players[to]] = [players[to], players[from]];
+      return { ...g, players, updatedAt: Date.now() };
+    });
+  }
+
+  function updateTeamInfo(patch: { teamName?: string; opponentName?: string }) {
+    if (game.finished) return;
+    setGame((g) => ({ ...g, ...patch, updatedAt: Date.now() }));
+  }
+
+  function updatePlayer(id: string, patch: Partial<Pick<Player, 'name' | 'number'>>) {
+    if (game.finished) return;
+    setGame((g) => ({
+      ...g,
+      players: g.players.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+      updatedAt: Date.now(),
+    }));
+  }
+
+  function addPlayer(name: string, number: string) {
+    if (game.finished) return;
+    setGame((g) => ({
+      ...g,
+      players: [...g.players, { id: uid(), name, number }],
+      updatedAt: Date.now(),
+    }));
+  }
+
+  function removePlayer(id: string) {
+    if (game.finished) return;
+    // ลบผู้เล่นออกจากรายชื่อ — event ของเขาจะตกไปรวมใน "Team" row (แต้มทีมไม่หาย)
+    setGame((g) => ({
+      ...g,
+      players: g.players.filter((p) => p.id !== id),
+      updatedAt: Date.now(),
+    }));
+  }
+
+  function toggleFinished() {
+    // จบเกม = ล็อกไม่ให้จดสถิติเพิ่ม / กดอีกครั้ง = ปลดล็อกกลับมาแก้ได้ (ไม่ลบข้อมูล)
+    setGame((g) => {
+      const finished = !g.finished;
+      return {
+        ...g,
+        finished,
+        // จบเกมให้หยุดนาฬิกาด้วย กันเวลาเดินต่อ
+        clock: finished ? { ...g.clock, running: false } : g.clock,
+        updatedAt: Date.now(),
+      };
+    });
+  }
+
+  function newGame() {
+    // เกมปัจจุบันมีข้อมูลที่ควรเก็บไหม (มีสถิติ, ปรับแต้มคู่แข่ง, หรือถูกล็อกจบเกม)
+    const worthKeeping =
+      game.finished || game.events.length > 0 || game.opponentEvents.length > 0;
+
+    if (worthKeeping) {
+      if (
+        !window.confirm(
+          'Start a new game? The current game will be saved to History (not deleted).',
+        )
+      )
+        return;
+      // archive เกมเก่าเข้าคลังก่อนเริ่มใหม่ — ไม่ลบข้อมูล
+      const list = archiveGame(game);
+      setSavedGames(list);
+    } else {
+      if (!window.confirm('Start a new game?')) return;
+    }
+
+    const fresh = createMockGame();
+    setGame(fresh);
+    saveGame(fresh);
+    setViewingId(null);
+    setTab('live');
+  }
+
+  /** เปิดเกมเก่าจากคลังมาดู (ที่แท็บ Box Score) */
+  function openSavedGame(id: string) {
+    setViewingId(id);
+    setTab('box');
+  }
+
+  /** เลิกดูเกมเก่า กลับมาที่เกมปัจจุบัน */
+  function backToCurrent() {
+    setViewingId(null);
+    setTab('live');
+  }
+
+  /** ลบเกมออกจากคลัง */
+  function removeSavedGame(id: string) {
+    const list = deleteSavedGame(id);
+    setSavedGames(list);
+    if (viewingId === id) setViewingId(null);
+  }
+
+  function toggleClock() {
+    if (game.finished) return; // เกมล็อกอยู่ ห้ามเดินนาฬิกา
+    setGame((g) => {
+      // กด START ตอนเวลาหมด (0:00) -> ขึ้นช่วงถัดไป + เวลาเต็ม แล้วเดินต่อ
+      // เกินควอเตอร์ปกติจะเข้าสู่ช่วงต่อเวลา (overtime: EX1, EX2, ...) ได้เรื่อยๆ
+      if (!g.clock.running && g.clock.remainingMs <= 0) {
+        return {
+          ...g,
+          clock: {
+            quarter: g.clock.quarter + 1,
+            remainingMs: g.config.minutesPerQuarter * 60 * 1000,
+            running: true,
+          },
+          updatedAt: Date.now(),
+        };
+      }
+      return { ...g, clock: { ...g.clock, running: !g.clock.running } };
+    });
+  }
+  /** ตั้งเวลา/ควอเตอร์เอง (จาก modal แก้เวลา) — pause ให้ด้วยกันเวลาวิ่งชน */
+  function setClock(quarter: number, remainingMs: number) {
+    if (game.finished) return;
+    setGame((g) => ({
+      ...g,
+      clock: {
+        quarter: Math.max(1, Math.round(quarter)),
+        remainingMs: Math.max(0, Math.round(remainingMs)),
+        running: false,
+      },
+      updatedAt: Date.now(),
+    }));
+  }
+  function resetClock() {
+    if (game.finished) return;
+    if (!window.confirm('Reset clock?')) return;
+    setGame((g) => ({
+      ...g,
+      clock: {
+        ...g.clock,
+        remainingMs: g.config.minutesPerQuarter * 60 * 1000,
+        running: false,
+      },
+    }));
+  }
+  function nextQuarter() {
+    if (game.finished) return;
+    if (!window.confirm('Next quarter?')) return;
+    setGame((g) => ({
+      ...g,
+      clock: {
+        quarter: g.clock.quarter + 1,
+        remainingMs: g.config.minutesPerQuarter * 60 * 1000,
+        running: false,
+      },
+    }));
+  }
 
   return (
     <div className="app-shell">
-      <header className="app-header">
-        <div className="brand">
-          <div className="brand__logo">◎</div>
-          <div>
-            <div className="brand__title">COURTSIDE</div>
-            <div className="brand__sub">The Solo Stat Desk</div>
-          </div>
-        </div>
-        <div className="header-spacer" />
-        <span className="tag">เดโม UI · mock</span>
-      </header>
+      <TopBar
+        activeTab={tab}
+        onTabChange={(t) => {
+          // กลับไปแท็บ Live = เลิกดูเกมเก่า กลับมาเกมปัจจุบันเสมอ
+          if (t === 'live') setViewingId(null);
+          setTab(t);
+        }}
+        clock={game.clock}
+        totalQuarters={game.config.quarters}
+        onToggleClock={toggleClock}
+        onNextQuarter={nextQuarter}
+        onResetClock={resetClock}
+        onSetClock={setClock}
+        onNewGame={newGame}
+        onLogoClick={backToCurrent}
+        saved={saved}
+        finished={!!game.finished}
+        onToggleFinished={toggleFinished}
+      />
 
-      <LivePage initialGame={mockGame} />
-
-      <div className="app-footer-note">
-        เดโมหน้า Live — ยังไม่บันทึกถาวร (ต่อ localStorage ในขั้นถัดไป)
-      </div>
+      {tab === 'live' && (
+        <LivePage
+          game={game}
+          teamScore={box.teamScore}
+          opponentScore={opponentScore}
+          onPushEvent={pushEvent}
+          onTeamDelta={teamDelta}
+          onOpponentDelta={opponentDelta}
+          onReorderPlayers={reorderPlayers}
+          onUpdateTeamInfo={updateTeamInfo}
+          onUpdatePlayer={updatePlayer}
+          onAddPlayer={addPlayer}
+          onRemovePlayer={removePlayer}
+          onDeleteEvent={deleteEvent}
+        />
+      )}
+      {tab === 'box' && (
+        <BoxScorePage
+          game={viewingGame}
+          archived={isViewingArchived}
+          onBack={backToCurrent}
+        />
+      )}
+      {tab === 'review' && (
+        <ReviewPage
+          currentGame={game}
+          savedGames={savedGames}
+          onOpen={openSavedGame}
+          onDelete={removeSavedGame}
+        />
+      )}
     </div>
   );
 }

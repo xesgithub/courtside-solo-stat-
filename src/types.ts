@@ -13,7 +13,8 @@ export type StatKind =
   | 'STL' // สตีล
   | 'BLK' // บล็อก
   | 'TO' // เทิร์นโอเวอร์
-  | 'PF'; // ฟาวล์ (ทีมเราฟาวล์ -> คู่แข่ง +1)
+  | 'PF' // ฟาวล์ (ทีมเราฟาวล์ -> คู่แข่ง +1)
+  | 'PTS_ADJ'; // ปรับแต้มทีมเราแบบเร็ว (ไม่ระบุตัว) พก delta ใน points
 
 /** ผู้เล่นทีมเรา */
 export interface Player {
@@ -36,6 +37,7 @@ export interface StatEvent {
   quarter: number; // อยู่ควอเตอร์ไหนตอนบันทึก
   clockMs: number; // เวลาในนาฬิกา ณ ตอนบันทึก (ms ที่เหลือ)
   ts: number; // timestamp จริง (Date.now) ไว้เรียงลำดับ
+  points?: number; // ใช้กับ PTS_ADJ เท่านั้น: +1 / -1 (ปรับแต้มทีมเราแบบเร็ว)
   note?: string;
 }
 

@@ -6,3 +6,11 @@ dist-ssr
 .env
 .env.local
 *.log
+
+# TypeScript build cache
+*.tsbuildinfo
+
+# Editor / IDE
+.vscode
+.idea
+*.swp

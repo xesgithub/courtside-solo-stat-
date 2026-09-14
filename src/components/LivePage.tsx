@@ -1,64 +1,73 @@
 import { useMemo, useState } from 'react';
-import type { Game, StatEvent } from '../types';
+import type { Game, Player, StatEvent } from '../types';
 import type { ActionDef } from '../lib/actions';
-import { uid } from '../lib/mock';
-import {
-  computeBoxScore,
-  computeOpponentScore,
-  type PlayerLine,
-} from '../lib/stats';
-import { PlayerList } from './PlayerList';
+import { computeBoxScore, type PlayerLine } from '../lib/stats';
+import { PlayerList, type StatMode } from './PlayerList';
 import { ActionPad } from './ActionPad';
-import { OpponentPanel } from './OpponentPanel';
-import { Scoreboard } from './Scoreboard';
-import { MiniBoxScore } from './MiniBoxScore';
+import { ScorePanel } from './ScorePanel';
+import { EventLog } from './EventLog';
 import { PromptModal, type PromptMode } from './PromptModal';
+import { TeamEditModal } from './TeamEditModal';
 
 interface PendingPrompt {
   mode: PromptMode;
+  /** คนที่เพิ่งยิง — ห้ามเลือกเป็นคนแอสซิสต์/รีบาวด์ตัวเอง */
+  shooterId: string;
 }
 
-export function LivePage({ initialGame }: { initialGame: Game }) {
-  const [game, setGame] = useState<Game>(initialGame);
+interface Props {
+  game: Game;
+  teamScore: number;
+  opponentScore: number;
+  onPushEvent: (ev: Omit<StatEvent, 'id' | 'ts' | 'quarter' | 'clockMs'>) => void;
+  onTeamDelta: (delta: number) => void;
+  onOpponentDelta: (delta: number) => void;
+  onReorderPlayers: (fromId: string, toId: string) => void;
+  onUpdateTeamInfo: (patch: { teamName?: string; opponentName?: string }) => void;
+  onUpdatePlayer: (id: string, patch: Partial<Pick<Player, 'name' | 'number'>>) => void;
+  onAddPlayer: (name: string, number: string) => void;
+  onRemovePlayer: (id: string) => void;
+  onDeleteEvent: (id: string) => void;
+}
+
+export function LivePage({
+  game,
+  teamScore,
+  opponentScore,
+  onPushEvent,
+  onTeamDelta,
+  onOpponentDelta,
+  onReorderPlayers,
+  onUpdateTeamInfo,
+  onUpdatePlayer,
+  onAddPlayer,
+  onRemovePlayer,
+  onDeleteEvent,
+}: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [prompt, setPrompt] = useState<PendingPrompt | null>(null);
+  const [statMode, setStatMode] = useState<StatMode>('pts');
+  const [editing, setEditing] = useState(false);
 
-  const box = useMemo(
-    () => computeBoxScore(game.players, game.events),
-    [game.players, game.events],
-  );
+  const finished = !!game.finished;
+
+  const selectedPlayer = game.players.find((p) => p.id === selectedId) ?? null;
+
   const linesById = useMemo(() => {
+    const box = computeBoxScore(game.players, game.events);
     const m = new Map<string, PlayerLine>();
     box.lines.forEach((l) => m.set(l.playerId, l));
     return m;
-  }, [box.lines]);
-  const opponentScore = useMemo(() => computeOpponentScore(game), [game]);
-
-  const selectedPlayer =
-    game.players.find((p) => p.id === selectedId) ?? null;
-
-  function pushEvent(ev: Omit<StatEvent, 'id' | 'ts' | 'quarter' | 'clockMs'>) {
-    setGame((g) => ({
-      ...g,
-      events: [
-        ...g.events,
-        {
-          id: uid(),
-          ts: Date.now(),
-          quarter: g.clock.quarter,
-          clockMs: g.clock.remainingMs,
-          ...ev,
-        },
-      ],
-      updatedAt: Date.now(),
-    }));
-  }
+  }, [game.players, game.events]);
 
   function handleAction(action: ActionDef) {
+    if (finished) return;
     if (!selectedPlayer) return;
-    pushEvent({ kind: action.kind, playerId: selectedPlayer.id });
-    if (action.asksAssist) setPrompt({ mode: 'assist' });
-    else if (action.asksRebound) setPrompt({ mode: 'rebound' });
+    onPushEvent({ kind: action.kind, playerId: selectedPlayer.id });
+    if (action.asksAssist)
+      setPrompt({ mode: 'assist', shooterId: selectedPlayer.id });
+    else if (action.asksRebound)
+      setPrompt({ mode: 'rebound', shooterId: selectedPlayer.id });
   }
 
   function resolvePrompt(kind: 'AST' | 'REB', target: string | 'team' | 'skip') {
@@ -67,95 +76,107 @@ export function LivePage({ initialGame }: { initialGame: Game }) {
       return;
     }
     if (target === 'team') {
-      pushEvent({ kind, isTeam: true });
+      onPushEvent({ kind, isTeam: true });
     } else {
-      pushEvent({ kind, playerId: target });
+      onPushEvent({ kind, playerId: target });
     }
     setPrompt(null);
-  }
-
-  function opponentDelta(delta: number) {
-    setGame((g) => ({
-      ...g,
-      opponentEvents: [
-        ...g.opponentEvents,
-        {
-          id: uid(),
-          delta,
-          quarter: g.clock.quarter,
-          clockMs: g.clock.remainingMs,
-          ts: Date.now(),
-        },
-      ],
-      updatedAt: Date.now(),
-    }));
-  }
-
-  function toggleClock() {
-    setGame((g) => ({ ...g, clock: { ...g.clock, running: !g.clock.running } }));
-  }
-  function resetClock() {
-    setGame((g) => ({
-      ...g,
-      clock: {
-        ...g.clock,
-        remainingMs: g.config.minutesPerQuarter * 60 * 1000,
-        running: false,
-      },
-    }));
-  }
-  function nextQuarter() {
-    setGame((g) => ({
-      ...g,
-      clock: {
-        quarter: g.clock.quarter + 1,
-        remainingMs: g.config.minutesPerQuarter * 60 * 1000,
-        running: false,
-      },
-    }));
   }
 
   return (
     <>
       <div className="live">
-        <PlayerList
-          teamName={game.teamName}
-          players={game.players}
-          linesById={linesById}
-          selectedId={selectedId}
-          onSelect={(id) => setSelectedId(id === selectedId ? null : id)}
-        />
+        <section className="panel live__players">
+          <div className="panel__head">
+            <div className="live__head-left">
+              <span className="panel__label">
+                {game.teamName} · {finished ? 'Game finished (locked)' : 'Tap to log stats'}
+              </span>
+              <button
+                className="edit-team-btn"
+                onClick={() => setEditing(true)}
+                disabled={finished}
+                title={finished ? 'Game locked' : 'Edit team / players'}
+              >
+                ✎ Edit team
+              </button>
+            </div>
+            <div className="statmode-toggle">
+              <button
+                className={
+                  'statmode-btn' + (statMode === 'pts' ? ' statmode-btn--active' : '')
+                }
+                onClick={() => setStatMode('pts')}
+              >
+                PTS
+              </button>
+              <button
+                className={
+                  'statmode-btn' + (statMode === 'full' ? ' statmode-btn--active' : '')
+                }
+                onClick={() => setStatMode('full')}
+              >
+                PTS·REB·AST
+              </button>
+            </div>
+          </div>
+          <PlayerList
+            players={game.players}
+            linesById={linesById}
+            statMode={statMode}
+            selectedId={selectedId}
+            onSelect={(id) => setSelectedId(id === selectedId ? null : id)}
+            onReorder={onReorderPlayers}
+          />
+        </section>
 
-        <div className="center-col">
-          <Scoreboard
-            teamName={game.teamName}
-            opponentName={game.opponentName}
-            teamScore={box.teamScore}
-            opponentScore={opponentScore}
-            clock={game.clock}
-            onToggleClock={toggleClock}
-            onNextQuarter={nextQuarter}
-            onResetClock={resetClock}
-          />
-          <ActionPad
-            player={selectedPlayer}
-            onAction={handleAction}
-            onClose={() => setSelectedId(null)}
-          />
-          <MiniBoxScore players={game.players} box={box} />
+        <div className="live__right">
+          <section className="panel live__score">
+            <ScorePanel
+              teamName={game.teamName}
+              teamScore={teamScore}
+              opponentName={game.opponentName}
+              opponentScore={opponentScore}
+              onTeamDelta={finished ? () => {} : onTeamDelta}
+              onOpponentDelta={finished ? () => {} : onOpponentDelta}
+            />
+          </section>
+
+          <section className="panel live__events">
+            <EventLog
+              game={game}
+              limit={3}
+              onDelete={finished ? undefined : onDeleteEvent}
+            />
+          </section>
+
+          <section
+            className={'panel live__actions' + (finished ? ' live__actions--locked' : '')}
+          >
+            {finished ? (
+              <div className="game-locked">
+                <div className="game-locked__title">🔒 Game finished</div>
+                <div className="game-locked__text">
+                  Stats are locked. Tap “Reopen / keep editing” to log or change more.
+                  Existing data is never deleted.
+                </div>
+              </div>
+            ) : (
+              <ActionPad
+                player={selectedPlayer}
+                onAction={handleAction}
+                onClose={() => setSelectedId(null)}
+              />
+            )}
+          </section>
         </div>
-
-        <OpponentPanel
-          opponentName={game.opponentName}
-          score={opponentScore}
-          onDelta={opponentDelta}
-        />
       </div>
 
       {prompt && (
         <PromptModal
           mode={prompt.mode}
           players={game.players}
+          excludeId={prompt.shooterId}
           onPick={(pid) =>
             resolvePrompt(prompt.mode === 'assist' ? 'AST' : 'REB', pid)
           }
@@ -165,6 +186,19 @@ export function LivePage({ initialGame }: { initialGame: Game }) {
           onSkip={() =>
             resolvePrompt(prompt.mode === 'assist' ? 'AST' : 'REB', 'skip')
           }
+        />
+      )}
+
+      {editing && (
+        <TeamEditModal
+          teamName={game.teamName}
+          opponentName={game.opponentName}
+          players={game.players}
+          onUpdateTeamInfo={onUpdateTeamInfo}
+          onUpdatePlayer={onUpdatePlayer}
+          onAddPlayer={onAddPlayer}
+          onRemovePlayer={onRemovePlayer}
+          onClose={() => setEditing(false)}
         />
       )}
     </>
