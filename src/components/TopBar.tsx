@@ -12,11 +12,12 @@ interface Props {
   clock: Clock;
   totalQuarters: number;
   onToggleClock: () => void;
-  onNextQuarter: () => void;
   onResetClock: () => void;
   /** ตั้งเวลา/ควอเตอร์เอง (จาก modal แตะที่นาฬิกา) */
   onSetClock: (quarter: number, remainingMs: number) => void;
   onNewGame: () => void;
+  /** ล้างทุกอย่างกลับเป็นเกมเริ่มต้น (ไม่เก็บเกมเก่า) */
+  onResetAll: () => void;
   /** กดโลโก้เพื่อกลับหน้า Live */
   onLogoClick: () => void;
 
@@ -40,10 +41,10 @@ export function TopBar({
   clock,
   totalQuarters,
   onToggleClock,
-  onNextQuarter,
   onResetClock,
   onSetClock,
   onNewGame,
+  onResetAll,
   onLogoClick,
   saved = false,
   finished = false,
@@ -96,14 +97,6 @@ export function TopBar({
           >
             ↺
           </button>
-          <button
-            className="clk-btn"
-            onClick={onNextQuarter}
-            disabled={finished}
-            title="Next quarter"
-          >
-            →
-          </button>
         </div>
       </div>
 
@@ -118,6 +111,13 @@ export function TopBar({
         {saved && <span className="autosaved">● Saved</span>}
         <button className="clk-btn" onClick={onNewGame} title="Start a new game">
           New game
+        </button>
+        <button
+          className="clk-btn clk-btn--danger"
+          onClick={onResetAll}
+          title="Reset everything (current game will be discarded, not saved)"
+        >
+          Reset all
         </button>
         <nav className="tabs" role="tablist" aria-label="Views">
           {TABS.map((t) => (

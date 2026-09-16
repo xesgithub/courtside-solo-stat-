@@ -1729,3 +1729,36 @@ button {
   padding: 10px 12px;
   margin: 0 0 16px;
 }
+
+
+/* ---------- Reset all button (danger) ---------- */
+.clk-btn--danger {
+  background: transparent;
+  color: var(--foul, #ff6b6b);
+  border-color: var(--foul, #ff6b6b);
+}
+.clk-btn--danger:hover {
+  background: var(--foul, #ff6b6b);
+  color: #2a0d0d;
+  filter: none;
+}
+
+/* ---------- New game modal ---------- */
+.newgame__dummy {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  flex-wrap: wrap;
+}
+.newgame__dummy-hint {
+  font-size: 12px;
+  opacity: 0.65;
+}
+.modal__actions--split {
+  display: flex;
+  gap: 8px;
+}
+.modal__actions--split .btn {
+  flex: 1;
+}

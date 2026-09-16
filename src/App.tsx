@@ -3,7 +3,8 @@ import { TopBar, type Tab } from './components/TopBar';
 import { LivePage } from './components/LivePage';
 import { BoxScorePage } from './components/BoxScorePage';
 import { ReviewPage } from './components/ReviewPage';
-import { createMockGame, uid } from './lib/mock';
+import { NewGameModal } from './components/NewGameModal';
+import { createMockGame, createGame, uid, type NewGameConfig } from './lib/mock';
 import { computeBoxScore, computeOpponentScore } from './lib/stats';
 import {
   loadGame,
@@ -21,6 +22,8 @@ export default function App() {
   const [savedGames, setSavedGames] = useState<Game[]>(() => loadSavedGames());
   // id ของเกมเก่าที่กำลังเปิดดู (null = กำลังดูเกมปัจจุบัน)
   const [viewingId, setViewingId] = useState<string | null>(null);
+  // เปิด modal ตั้งค่าเกมใหม่
+  const [newGameOpen, setNewGameOpen] = useState(false);
   const saveTimer = useRef<number | null>(null);
 
   // เกมที่กำลังเปิดดูอยู่: ถ้าเลือกเกมเก่าให้ใช้ตัวนั้น ไม่งั้นใช้เกมปัจจุบัน
@@ -186,28 +189,43 @@ export default function App() {
   }
 
   function newGame() {
-    // เกมปัจจุบันมีข้อมูลที่ควรเก็บไหม (มีสถิติ, ปรับแต้มคู่แข่ง, หรือถูกล็อกจบเกม)
+    // เปิด modal ตั้งค่าเกมใหม่ — การ archive/สร้างจริงจะทำตอนกด Create ใน modal
+    setNewGameOpen(true);
+  }
+
+  /** สร้างเกมใหม่จากค่าที่ตั้งใน NewGameModal (archive เกมเก่าถ้ามีข้อมูล) */
+  function createFromConfig(config: NewGameConfig) {
     const worthKeeping =
       game.finished || game.events.length > 0 || game.opponentEvents.length > 0;
-
     if (worthKeeping) {
-      if (
-        !window.confirm(
-          'Start a new game? The current game will be saved to History (not deleted).',
-        )
-      )
-        return;
-      // archive เกมเก่าเข้าคลังก่อนเริ่มใหม่ — ไม่ลบข้อมูล
+      // เก็บเกมเก่าเข้า History ก่อนเริ่มใหม่ — ไม่ลบข้อมูล
       const list = archiveGame(game);
       setSavedGames(list);
-    } else {
-      if (!window.confirm('Start a new game?')) return;
     }
+    const fresh = createGame(config);
+    setGame(fresh);
+    saveGame(fresh);
+    setViewingId(null);
+    setNewGameOpen(false);
+    setTab('live');
+  }
 
+  /**
+   * Reset all — ล้างทุกอย่างกลับเป็นเกมเริ่มต้น (dummy) โดย "ไม่" เก็บเกมเก่า
+   * ต่างจาก New game ตรงที่ลบเกมปัจจุบันทิ้งเลย (ไม่ archive)
+   */
+  function resetAll() {
+    if (
+      !window.confirm(
+        'Reset everything? The current game will be permanently discarded (not saved to History). Saved games in History are not affected.',
+      )
+    )
+      return;
     const fresh = createMockGame();
     setGame(fresh);
     saveGame(fresh);
     setViewingId(null);
+    setNewGameOpen(false);
     setTab('live');
   }
 
@@ -274,18 +292,6 @@ export default function App() {
       },
     }));
   }
-  function nextQuarter() {
-    if (game.finished) return;
-    if (!window.confirm('Next quarter?')) return;
-    setGame((g) => ({
-      ...g,
-      clock: {
-        quarter: g.clock.quarter + 1,
-        remainingMs: g.config.minutesPerQuarter * 60 * 1000,
-        running: false,
-      },
-    }));
-  }
 
   return (
     <div className="app-shell">
@@ -299,10 +305,10 @@ export default function App() {
         clock={game.clock}
         totalQuarters={game.config.quarters}
         onToggleClock={toggleClock}
-        onNextQuarter={nextQuarter}
         onResetClock={resetClock}
         onSetClock={setClock}
         onNewGame={newGame}
+        onResetAll={resetAll}
         onLogoClick={backToCurrent}
         saved={saved}
         finished={!!game.finished}
@@ -338,6 +344,13 @@ export default function App() {
           savedGames={savedGames}
           onOpen={openSavedGame}
           onDelete={removeSavedGame}
+        />
+      )}
+
+      {newGameOpen && (
+        <NewGameModal
+          onCreate={createFromConfig}
+          onClose={() => setNewGameOpen(false)}
         />
       )}
     </div>
