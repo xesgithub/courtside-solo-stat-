@@ -1414,7 +1414,7 @@ button {
 }
 .edit-roster__head {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
 }
 .edit-roster__list {
@@ -1761,4 +1761,13 @@ button {
 }
 .modal__actions--split .btn {
   flex: 1;
+}
+.newgame__gen {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.newgame__gen-btn {
+  padding: 6px 12px;
+  font-size: 13px;
 }

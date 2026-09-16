@@ -29,6 +29,20 @@ export function NewGameModal({ onCreate, onClose }: Props) {
   const [minutes, setMinutes] = useState(String(DEFAULT_NEW_GAME.minutesPerQuarter));
   const [quarters, setQuarters] = useState(String(DEFAULT_NEW_GAME.quarters));
   const [rows, setRows] = useState<PlayerRow[]>(() => [makeRow(), makeRow(), makeRow()]);
+  // จำนวนคนที่จะสร้างเร็วๆ (default 8)
+  const [genCount, setGenCount] = useState('8');
+
+  /** เบอร์เริ่มต้นตอน generate/dummy (แก้เป็นเบอร์อื่นได้ทีหลัง) */
+  const START_NUMBER = 4;
+
+  /** สร้างรายชื่อผู้เล่นเร็วๆ ตามจำนวนที่ระบุ: เบอร์เริ่มที่ 4, ชื่อ "Player N" */
+  function generateRows() {
+    const n = clampNum(genCount, 8, 1, 30);
+    const generated = Array.from({ length: n }, (_, i) =>
+      makeRow(String(START_NUMBER + i), `Player ${i + 1}`),
+    );
+    setRows(generated);
+  }
 
   function fillDummy() {
     setTeamName(DUMMY_NEW_GAME.teamName);
@@ -132,6 +146,24 @@ export function NewGameModal({ onCreate, onClose }: Props) {
         <div className="edit-roster">
           <div className="edit-roster__head">
             <span className="panel__label">Players ({playerCount})</span>
+            <div className="newgame__gen">
+              <input
+                className="edit-input edit-input--num"
+                value={genCount}
+                onChange={(e) => setGenCount(e.target.value)}
+                inputMode="numeric"
+                aria-label="Number of players to generate"
+                title="How many players to generate"
+              />
+              <button
+                className="btn btn--ghost newgame__gen-btn"
+                onClick={generateRows}
+                type="button"
+                title="Generate players with numbers starting at 4"
+              >
+                Generate
+              </button>
+            </div>
           </div>
           <div className="edit-roster__list">
             {rows.map((r) => (
