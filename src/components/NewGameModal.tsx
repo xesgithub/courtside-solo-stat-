@@ -1,75 +1,30 @@
 import { useState } from 'react';
-import {
-  DEFAULT_NEW_GAME,
-  DUMMY_NEW_GAME,
-  type NewGameConfig,
-} from '../lib/mock';
+import { DEFAULT_NEW_GAME, type NewGameConfig } from '../lib/mock';
 
 interface Props {
   onCreate: (config: NewGameConfig) => void;
   onClose: () => void;
 }
 
-/** แถวผู้เล่นในฟอร์ม (state ภายใน modal) */
-interface PlayerRow {
-  key: string;
-  number: string;
-  name: string;
-}
-
-let rowSeq = 0;
-function makeRow(number = '', name = ''): PlayerRow {
-  rowSeq += 1;
-  return { key: `row-${rowSeq}`, number, name };
-}
+/** เบอร์เริ่มต้นของผู้เล่นที่สร้างอัตโนมัติ (แก้ทีหลังได้ที่หน้า Edit team) */
+const START_NUMBER = 4;
 
 export function NewGameModal({ onCreate, onClose }: Props) {
   const [teamName, setTeamName] = useState(DEFAULT_NEW_GAME.teamName);
   const [opponentName, setOpponentName] = useState(DEFAULT_NEW_GAME.opponentName);
   const [minutes, setMinutes] = useState(String(DEFAULT_NEW_GAME.minutesPerQuarter));
   const [quarters, setQuarters] = useState(String(DEFAULT_NEW_GAME.quarters));
-  const [rows, setRows] = useState<PlayerRow[]>(() => [makeRow(), makeRow(), makeRow()]);
-  // จำนวนคนที่จะสร้างตอนกด Fill dummy (default 8)
-  const [genCount, setGenCount] = useState('8');
-
-  /** เบอร์เริ่มต้นตอน Fill dummy (แก้เป็นเบอร์อื่นได้ทีหลัง) */
-  const START_NUMBER = 4;
-
-  /**
-   * Fill dummy — เติมค่าตัวอย่างให้ครบเพื่อเริ่มเกมเร็ว:
-   * - ชื่อทีม/คู่แข่ง + เวลา จาก preset
-   * - สร้างผู้เล่นตามจำนวนที่ระบุในช่อง (เบอร์เริ่มที่ 4, ชื่อ "Player N")
-   */
-  function fillDummy() {
-    setTeamName(DUMMY_NEW_GAME.teamName);
-    setOpponentName(DUMMY_NEW_GAME.opponentName);
-    setMinutes(String(DUMMY_NEW_GAME.minutesPerQuarter));
-    setQuarters(String(DUMMY_NEW_GAME.quarters));
-    const n = clampNum(genCount, 8, 1, 30);
-    setRows(
-      Array.from({ length: n }, (_, i) =>
-        makeRow(String(START_NUMBER + i), `Player ${i + 1}`),
-      ),
-    );
-  }
-
-  function updateRow(key: string, patch: Partial<Pick<PlayerRow, 'number' | 'name'>>) {
-    setRows((rs) => rs.map((r) => (r.key === key ? { ...r, ...patch } : r)));
-  }
-
-  function addRow() {
-    setRows((rs) => [...rs, makeRow()]);
-  }
-
-  function removeRow(key: string) {
-    setRows((rs) => rs.filter((r) => r.key !== key));
-  }
+  // จำนวนผู้เล่นที่จะสร้างอัตโนมัติ (default 8)
+  const [playerCount, setPlayerCount] = useState('8');
 
   function handleCreate() {
-    // เก็บเฉพาะแถวที่มีชื่อหรือเบอร์ (ตัดแถวว่างทิ้ง)
-    const players = rows
-      .map((r) => ({ number: r.number.trim(), name: r.name.trim() }))
-      .filter((p) => p.name || p.number);
+    // สร้างผู้เล่นอัตโนมัติตามจำนวน: เบอร์เริ่มที่ 4, ชื่อ "Player N"
+    // (ไปแก้ชื่อ/เบอร์จริงได้ที่หน้า Edit team หลังสร้างเกม)
+    const n = clampNum(playerCount, 8, 1, 30);
+    const players = Array.from({ length: n }, (_, i) => ({
+      number: String(START_NUMBER + i),
+      name: `Player ${i + 1}`,
+    }));
 
     onCreate({
       teamName: teamName.trim(),
@@ -80,33 +35,10 @@ export function NewGameModal({ onCreate, onClose }: Props) {
     });
   }
 
-  const playerCount = rows.filter((r) => r.name.trim() || r.number.trim()).length;
-
   return (
     <div className="modal-overlay" onClick={onClose}>
       <div className="modal modal--edit" onClick={(e) => e.stopPropagation()}>
         <div className="modal__title">New game</div>
-
-        {/* Fill dummy — สร้างเร็วๆ ตามจำนวนที่ระบุ */}
-        <div className="newgame__dummy">
-          <label className="newgame__count">
-            <span>Players</span>
-            <input
-              className="edit-input edit-input--num"
-              value={genCount}
-              onChange={(e) => setGenCount(e.target.value)}
-              inputMode="numeric"
-              aria-label="Number of players to fill"
-              title="How many players to create"
-            />
-          </label>
-          <button className="btn btn--ghost" onClick={fillDummy} type="button">
-            ⚡ Fill dummy
-          </button>
-          <span className="newgame__dummy-hint">
-            เติมทีม/เวลา + สร้างผู้เล่นตามจำนวน (เบอร์เริ่มที่ 4)
-          </span>
-        </div>
 
         {/* Team names */}
         <div className="edit-teams">
@@ -154,46 +86,20 @@ export function NewGameModal({ onCreate, onClose }: Props) {
           </label>
         </div>
 
-        {/* Roster */}
-        <div className="edit-roster">
-          <div className="edit-roster__head">
-            <span className="panel__label">Players ({playerCount})</span>
-          </div>
-          <div className="edit-roster__list">
-            {rows.map((r) => (
-              <div className="edit-row" key={r.key}>
-                <input
-                  className="edit-input edit-input--num"
-                  value={r.number}
-                  onChange={(e) => updateRow(r.key, { number: e.target.value })}
-                  placeholder="No."
-                  inputMode="numeric"
-                  aria-label="Player number"
-                />
-                <input
-                  className="edit-input edit-input--name"
-                  value={r.name}
-                  onChange={(e) => updateRow(r.key, { name: e.target.value })}
-                  placeholder="Player name"
-                  aria-label="Player name"
-                />
-                <button
-                  className="edit-remove"
-                  onClick={() => removeRow(r.key)}
-                  aria-label="Remove row"
-                  title="Remove row"
-                  type="button"
-                >
-                  ✕
-                </button>
-              </div>
-            ))}
-          </div>
-
-          <div className="edit-row edit-row--add">
-            <button className="edit-add" onClick={addRow} type="button">
-              Add
-            </button>
+        {/* Player count */}
+        <div className="edit-teams">
+          <label className="edit-field">
+            <span className="edit-field__label">Players</span>
+            <input
+              className="edit-input"
+              value={playerCount}
+              onChange={(e) => setPlayerCount(e.target.value)}
+              inputMode="numeric"
+              placeholder="8"
+            />
+          </label>
+          <div className="edit-field newgame__note">
+            สร้างผู้เล่นให้อัตโนมัติ (เบอร์เริ่มที่ 4) — แก้ชื่อ/เบอร์ได้ที่ Edit team ภายหลัง
           </div>
         </div>
 

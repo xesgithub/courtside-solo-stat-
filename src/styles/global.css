@@ -1744,17 +1744,6 @@ button {
 }
 
 /* ---------- New game modal ---------- */
-.newgame__dummy {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 14px;
-  flex-wrap: wrap;
-}
-.newgame__dummy-hint {
-  font-size: 12px;
-  opacity: 0.65;
-}
 .modal__actions--split {
   display: flex;
   gap: 8px;
@@ -1762,10 +1751,10 @@ button {
 .modal__actions--split .btn {
   flex: 1;
 }
-.newgame__count {
+.newgame__note {
+  font-size: 12px;
+  opacity: 0.65;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  font-weight: 700;
+  line-height: 1.4;
 }
