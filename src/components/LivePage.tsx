@@ -92,6 +92,9 @@ export function LivePage({
               <span className="panel__label">
                 {game.teamName} · {finished ? 'Game finished (locked)' : 'Tap to log stats'}
               </span>
+              <span className="live__count" title="Players in roster">
+                {game.players.length} 👤
+              </span>
               <button
                 className="edit-team-btn"
                 onClick={() => setEditing(true)}
