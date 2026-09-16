@@ -214,16 +214,31 @@ export default function App() {
    * Reset all — ล้างทุกอย่างกลับเป็นเกมเริ่มต้น (dummy) โดย "ไม่" เก็บเกมเก่า
    * ต่างจาก New game ตรงที่ลบเกมปัจจุบันทิ้งเลย (ไม่ archive)
    */
+  /**
+   * Reset all — ล้างสถิติทั้งหมดของเกมปัจจุบัน (แต้ม, event, นาฬิกา) กลับเป็นค่าเริ่มต้น
+   * แต่ "คง" รายชื่อผู้เล่น/เบอร์, ชื่อทีม/คู่แข่ง และ config (นาที/ควอเตอร์) ไว้
+   * ต่างจาก New game ตรงที่ไม่เก็บเกมเก่าเข้า History
+   */
   function resetAll() {
     if (
       !window.confirm(
-        'Reset everything? The current game will be permanently discarded (not saved to History). Saved games in History are not affected.',
+        'Reset all stats? Scores, events and the clock will be cleared. Players, team names and settings are kept. (Not saved to History.)',
       )
     )
       return;
-    const fresh = createMockGame();
-    setGame(fresh);
-    saveGame(fresh);
+    setGame((g) => ({
+      ...g,
+      // คง players / teamName / opponentName / config ไว้เหมือนเดิม
+      events: [],
+      opponentEvents: [],
+      clock: {
+        quarter: 1,
+        remainingMs: g.config.minutesPerQuarter * 60 * 1000,
+        running: false,
+      },
+      finished: false,
+      updatedAt: Date.now(),
+    }));
     setViewingId(null);
     setNewGameOpen(false);
     setTab('live');
