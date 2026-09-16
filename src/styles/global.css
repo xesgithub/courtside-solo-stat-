@@ -1762,12 +1762,10 @@ button {
 .modal__actions--split .btn {
   flex: 1;
 }
-.newgame__gen {
+.newgame__count {
   display: flex;
   align-items: center;
   gap: 6px;
-}
-.newgame__gen-btn {
-  padding: 6px 12px;
   font-size: 13px;
+  font-weight: 700;
 }
