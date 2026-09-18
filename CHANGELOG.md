@@ -3,6 +3,11 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.8] - 2026-09-18
+
+### Fixed
+- ปุ่ม Share: ลองเรียก Web Share API แชร์ไฟล์ก่อนเสมอเมื่อเบราว์เซอร์รองรับ (ไม่ตัดสินด้วย canShare อย่างเข้มงวด) เพื่อให้เด้ง share sheet เลือกส่ง LINE ได้ตรงบนเครื่องที่รองรับ (เช่น Windows Edge/Chrome) — ถ้าไม่รองรับจริงจึงค่อย copy/download
+
 ## [0.3.7] - 2026-09-18
 
 ### Changed
@@ -83,6 +88,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.8]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.8
 [0.3.7]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.7
 [0.3.6]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.6
 [0.3.5]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.5

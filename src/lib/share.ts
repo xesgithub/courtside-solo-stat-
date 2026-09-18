@@ -73,15 +73,20 @@ export async function shareBoxScore(
     share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
   };
 
-  // 1) ลองแชร์ไฟล์ผ่าน Web Share API ก่อน (ดีที่สุด: ส่งเข้า LINE ตรง)
-  if (nav.share && (!nav.canShare || nav.canShare({ files: [file] }))) {
-    try {
-      await nav.share({ files: [file], title: fileBase });
-      return 'shared';
-    } catch (err) {
-      if (err instanceof DOMException && err.name === 'AbortError') return 'canceled';
-      console.warn('[share] navigator.share({files}) failed:', err);
-      // ตกไปลองวิธีถัดไป
+  // 1) ลองแชร์ไฟล์ผ่าน Web Share API ก่อน (ดีที่สุด: เด้ง share sheet เลือก LINE ตรง)
+  //    ไม่ gate ด้วย canShare เข้มงวด — ถ้า canShare บอก true ก็ลอง, ถ้าไม่มี canShare ก็ลองเลย
+  //    (บางเบราว์เซอร์ canShare ให้ false แต่ share({files}) ทำงานได้จริง)
+  if (nav.share) {
+    const canFiles = nav.canShare ? nav.canShare({ files: [file] }) : true;
+    if (canFiles) {
+      try {
+        await nav.share({ files: [file], title: fileBase });
+        return 'shared';
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') return 'canceled';
+        console.warn('[share] navigator.share({files}) failed:', err);
+        // ตกไปลองวิธีถัดไป
+      }
     }
   }
 
