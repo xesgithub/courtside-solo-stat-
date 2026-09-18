@@ -58,6 +58,12 @@ function writeSavedGames(games: Game[]): void {
   }
 }
 
+/** เขียนทับคลังเกมทั้งก้อน (ใช้ตอน import/merge) คืนคลังที่เขียนไป */
+export function replaceSavedGames(games: Game[]): Game[] {
+  writeSavedGames(games);
+  return games;
+}
+
 /**
  * เก็บเกมเข้าคลัง (archive) — ถ้ามี id ซ้ำจะอัปเดตทับรายการเดิม
  * คืนคลังล่าสุดหลังบันทึก (ใหม่สุดอยู่บน)

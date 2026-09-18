@@ -6,14 +6,15 @@ import { ReviewPage } from './components/ReviewPage';
 import { NewGameModal } from './components/NewGameModal';
 import { createMockGame, createGame, uid, type NewGameConfig } from './lib/mock';
 import { computeBoxScore, computeOpponentScore } from './lib/stats';
-import { matchTimeOf } from './lib/format';
 import {
   loadGame,
   saveGame,
   loadSavedGames,
   archiveGame,
   deleteSavedGame,
+  replaceSavedGames,
 } from './lib/storage';
+import { buildBackup, parseBackup, mergeGames } from './lib/backup';
 import type { Game, Player, StatEvent } from './types';
 
 export default function App() {
@@ -42,11 +43,10 @@ export default function App() {
   );
 
   // รายการที่แสดงใน History = เกม active + เกมในคลัง โดยไม่ให้ id ซ้ำ
-  // เรียงตามเวลาแข่ง (scheduledAt) ใหม่สุดอยู่บนสุดเสมอ
+  // การจัดกลุ่ม/เรียงทำที่ ReviewPage (groupHistory) — ที่นี่แค่รวมให้ครบ
   const historyGames = useMemo(() => {
     const rest = savedGames.filter((g) => g.id !== game.id);
-    const all = [game, ...rest];
-    return all.sort((a, b) => matchTimeOf(b) - matchTimeOf(a));
+    return [game, ...rest];
   }, [game, savedGames]);
 
   // auto-save ลง localStorage — เขียน "ทันที" ทุกครั้งที่ game เปลี่ยน
@@ -276,6 +276,48 @@ export default function App() {
     setTab('live');
   }
 
+  /** Export เกมทั้งหมดเป็นไฟล์ JSON (ดาวน์โหลด) — ไว้สำรอง/ย้ายเครื่อง */
+  function exportBackup() {
+    // รวมเกม active + คลัง โดยไม่ซ้ำ id
+    const all = [game, ...savedGames.filter((g) => g.id !== game.id)];
+    const json = buildBackup(all);
+    const blob = new Blob([json], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    const stamp = new Date().toISOString().slice(0, 10);
+    a.href = url;
+    a.download = `courtside-backup-${stamp}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }
+
+  /** Import เกมจากไฟล์ JSON แล้ว merge เข้าคลัง (ไม่ลบของเดิม) */
+  function importBackup(file: File) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const incoming = parseBackup(String(reader.result ?? ''));
+        // เก็บเกม active ปัจจุบันเข้าคลังก่อน merge เพื่อไม่ให้ตกหล่น
+        const base = archiveGame(game);
+        const { games, added, updated } = mergeGames(base, incoming);
+        const saved = replaceSavedGames(games);
+        setSavedGames(saved);
+        setTab('review');
+        window.alert(
+          `Import สำเร็จ: เพิ่มใหม่ ${added} เกม, อัปเดต ${updated} เกม (รวม ${incoming.length} เกมในไฟล์)`,
+        );
+      } catch (err) {
+        window.alert(
+          'Import ไม่สำเร็จ: ' + (err instanceof Error ? err.message : 'ไฟล์ไม่ถูกต้อง'),
+        );
+      }
+    };
+    reader.onerror = () => window.alert('อ่านไฟล์ไม่สำเร็จ');
+    reader.readAsText(file);
+  }
+
   /**
    * ลบเกมออกจากคลัง (History)
    * - ปกติ: ลบออกจาก savedGames
@@ -424,6 +466,8 @@ export default function App() {
           onOpen={openSavedGame}
           onResume={resumeSavedGame}
           onDelete={removeSavedGame}
+          onExport={exportBackup}
+          onImport={importBackup}
         />
       )}
 

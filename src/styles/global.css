@@ -1547,6 +1547,30 @@ button {
   flex-direction: column;
   gap: 8px;
 }
+/* ปุ่ม Export/Import ใน History */
+.history-actions {
+  display: flex;
+  gap: 8px;
+}
+.history-actions__btn {
+  font-size: 12px;
+  padding: 4px 10px;
+}
+/* หัวข้อคั่นกลุ่มใน History */
+.history-group-head {
+  margin: 14px 0 8px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--team);
+}
+.history-group-head:first-child {
+  margin-top: 4px;
+}
+.history-group-head--finished {
+  color: var(--text-faint);
+}
 .history-item {
   display: flex;
   align-items: stretch;
