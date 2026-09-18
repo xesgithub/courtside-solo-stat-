@@ -457,6 +457,7 @@ export default function App() {
           game={viewingGame}
           archived={isViewingArchived}
           onBack={backToCurrent}
+          onResume={viewingId ? () => resumeSavedGame(viewingId) : undefined}
         />
       )}
       {tab === 'review' && (

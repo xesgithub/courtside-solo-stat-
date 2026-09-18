@@ -10,6 +10,8 @@ interface Props {
   archived?: boolean;
   /** กลับไปเกมปัจจุบัน */
   onBack?: () => void;
+  /** เปิดเกมนี้มาแก้/จดต่อ (resume) — มีเฉพาะตอนดูเกมจาก History */
+  onResume?: () => void;
 }
 
 function pct(made: number, att: number): string {
@@ -17,7 +19,7 @@ function pct(made: number, att: number): string {
   return Math.round((made / att) * 100) + '%';
 }
 
-export function BoxScorePage({ game, archived = false, onBack }: Props) {
+export function BoxScorePage({ game, archived = false, onBack, onResume }: Props) {
   const captureRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
 
@@ -91,11 +93,29 @@ export function BoxScorePage({ game, archived = false, onBack }: Props) {
             📁 Viewing a saved game: <b>{game.name}</b> ·{' '}
             <span className="archived-banner__time">saved {savedAt}</span>
           </span>
-          {onBack && (
-            <button className="btn btn--ghost" onClick={onBack}>
-              ← Back to current game
-            </button>
-          )}
+          <div className="archived-banner__actions">
+            {onBack && (
+              <button className="btn btn--ghost" onClick={onBack}>
+                ← Back to current game
+              </button>
+            )}
+            {onResume && (
+              <button
+                className="btn btn--primary archived-banner__resume"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      `Go to this match "${game.teamName} vs ${game.opponentName}" to edit / keep scoring? Your current game will be saved to History first.`,
+                    )
+                  )
+                    onResume();
+                }}
+                title="Open this match to edit / keep scoring"
+              >
+                ▶ Go to this match
+              </button>
+            )}
+          </div>
         </div>
       )}
 

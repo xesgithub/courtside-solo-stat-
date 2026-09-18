@@ -1514,6 +1514,11 @@ button {
 .archived-banner b {
   color: var(--opp);
 }
+.archived-banner__actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
 .archived-banner__time {
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
@@ -1704,8 +1709,7 @@ button {
 .brand__version {
   margin-left: 6px;
   font-size: 10px;
-  color: var(--text-faint);
-  opacity: 0.6;
+  color: var(--text-dim);
   font-variant-numeric: tabular-nums;
   vertical-align: baseline;
 }
