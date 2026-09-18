@@ -1640,6 +1640,37 @@ button {
 .history-item__del:active {
   transform: scale(0.94);
 }
+.history-item__resume {
+  flex: 0 0 auto;
+  width: 46px;
+  border-radius: var(--radius-sm);
+  background: var(--make-soft, rgba(74, 222, 128, 0.12));
+  border: 1px solid rgba(74, 222, 128, 0.4);
+  color: var(--make);
+  font-size: 16px;
+  transition: filter 0.12s, transform 0.05s;
+}
+.history-item__resume:hover {
+  filter: brightness(1.15);
+}
+.history-item__resume:active {
+  transform: scale(0.94);
+}
+
+/* เลข version แบบหลบๆ มุมล่างขวา — จางมาก ไม่รบกวนสายตา */
+.app-version {
+  position: fixed;
+  right: 6px;
+  bottom: 4px;
+  font-size: 10px;
+  line-height: 1;
+  color: var(--text-faint);
+  opacity: 0.35;
+  font-variant-numeric: tabular-nums;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
 
 /* ---------- Clock (กดที่นาฬิกาเพื่อแก้เวลา/quarter) ---------- */
 .topbar__clock-edit {

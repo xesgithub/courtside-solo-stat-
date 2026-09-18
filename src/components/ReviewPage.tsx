@@ -9,6 +9,8 @@ interface Props {
   savedGames: Game[];
   /** เปิดเกมไปดู Box Score */
   onOpen: (id: string) => void;
+  /** เปิดเกมกลับมาแก้/จดต่อ เป็นเกมปัจจุบัน */
+  onResume: (id: string) => void;
   /** ลบเกมออกจากคลัง */
   onDelete: (id: string) => void;
 }
@@ -18,7 +20,7 @@ function scoreOf(game: Game): { team: number; opp: number } {
   return { team: box.teamScore, opp: computeOpponentScore(game) };
 }
 
-export function ReviewPage({ savedGames, onOpen, onDelete }: Props) {
+export function ReviewPage({ savedGames, onOpen, onResume, onDelete }: Props) {
   const rows = useMemo(
     () =>
       savedGames.map((g) => ({
@@ -73,6 +75,21 @@ export function ReviewPage({ savedGames, onOpen, onDelete }: Props) {
                     >
                       {team} <span className="history-item__dash">–</span> {opp}
                     </span>
+                  </button>
+                  <button
+                    className="history-item__resume"
+                    onClick={() => {
+                      if (
+                        window.confirm(
+                          `Resume "${game.teamName} vs ${game.opponentName}" (${game.date}) to edit / keep scoring? Your current game will be saved to History first.`,
+                        )
+                      )
+                        onResume(game.id);
+                    }}
+                    aria-label="Resume and edit game"
+                    title="Resume / edit"
+                  >
+                    ▶
                   </button>
                   <button
                     className="history-item__del"

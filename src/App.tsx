@@ -263,6 +263,36 @@ export default function App() {
     if (viewingId === id) setViewingId(null);
   }
 
+  /**
+   * เปิดเกมจากคลังกลับมา "แก้/จดต่อ" เป็นเกมปัจจุบัน
+   * - ถ้าเกมปัจจุบันมีข้อมูลอยู่ (จบแล้ว หรือมี event) จะเก็บเข้า History ก่อน กันข้อมูลหาย
+   * - ดึงเกมที่เลือกออกจากคลัง แล้วตั้งเป็นเกมปัจจุบัน (แก้ต่อได้ที่แท็บ Live)
+   * - เกมที่เลือกจะถูกย้ายออกจากคลังชั่วคราว (จะกลับเข้าคลังอีกครั้งเมื่อเริ่มเกมใหม่/resume เกมอื่น)
+   */
+  function resumeSavedGame(id: string) {
+    // หาเกมเป้าหมายในคลังก่อน — ถ้าไม่เจอก็ไม่ทำอะไร
+    const target = savedGames.find((g) => g.id === id);
+    if (!target) return;
+
+    // เก็บเกมปัจจุบันเข้า History ถ้ายังมีข้อมูลที่ควรเก็บ (กันข้อมูลหาย)
+    const worthKeeping =
+      game.finished || game.events.length > 0 || game.opponentEvents.length > 0;
+
+    // อัปเดตคลัง: archive เกมปัจจุบัน (ถ้าควรเก็บ) แล้วเอาเกมเป้าหมายออก
+    let list = savedGames;
+    if (worthKeeping && game.id !== id) {
+      list = archiveGame(game);
+    }
+    list = deleteSavedGame(id);
+    setSavedGames(list);
+
+    // ตั้งเกมเป้าหมายเป็นเกมปัจจุบัน แล้วไปแท็บ Live เพื่อจดต่อ
+    setGame(target);
+    saveGame(target);
+    setViewingId(null);
+    setTab('live');
+  }
+
   function toggleClock() {
     if (game.finished) return; // เกมล็อกอยู่ ห้ามเดินนาฬิกา
     setGame((g) => {
@@ -358,6 +388,7 @@ export default function App() {
           currentGame={game}
           savedGames={savedGames}
           onOpen={openSavedGame}
+          onResume={resumeSavedGame}
           onDelete={removeSavedGame}
         />
       )}
@@ -368,6 +399,11 @@ export default function App() {
           onClose={() => setNewGameOpen(false)}
         />
       )}
+
+      {/* เลข version แบบหลบๆ มุมล่างขวา ไว้ตรวจว่า deploy เวอร์ชันไหนแล้ว */}
+      <span className="app-version" aria-hidden="true">
+        v{__APP_VERSION__}
+      </span>
     </div>
   );
 }
