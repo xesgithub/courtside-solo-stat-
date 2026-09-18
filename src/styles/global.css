@@ -1265,6 +1265,28 @@ button {
   color: var(--text-dim);
   font-style: italic;
 }
+/* ไฮไลต์ค่าผู้นำแต่ละหมวด (PTS/REB/AST สูงสุด) — เรียบ สากล
+   ตัวหนา + จุดเล็กใต้ตัวเลข บอกว่าเป็นผู้นำเกม */
+.full-box tbody td.is-leader {
+  position: relative;
+  font-weight: 800;
+  color: var(--text);
+}
+.full-box tbody td.is-leader::after {
+  content: '';
+  position: absolute;
+  left: 50%;
+  bottom: 3px;
+  transform: translateX(-50%);
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: var(--team);
+}
+/* PTS ที่เป็นผู้นำ: คงสีส้มเด่นอยู่แล้ว แค่ทำจุดให้เข้ากัน */
+.full-box tbody td.col-pts.is-leader::after {
+  background: var(--team);
+}
 
 /* ---------- iPad / responsive ---------- */
 @media (max-width: 1024px) {

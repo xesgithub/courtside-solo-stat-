@@ -3,6 +3,11 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.3] - 2026-09-18
+
+### Added
+- ไฮไลต์ **ผู้นำประจำเกม** ในตาราง Box Score — ค่า PTS / REB / AST สูงสุดจะเด่นขึ้น (ตัวหนา + จุดสีทีม) เน้นในตารางแบบเรียบ สากล ไม่เปลืองพื้นที่ (เสมอกันเน้นทุกคน, ไม่เน้นเลข 0)
+
 ## [0.3.2] - 2026-09-18
 
 ### Changed
@@ -47,6 +52,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.3]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.3
 [0.3.2]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.2
 [0.3.1]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.1
 [0.3.0]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.0

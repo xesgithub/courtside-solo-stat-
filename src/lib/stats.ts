@@ -153,3 +153,25 @@ export function computeOpponentScore(game: Game): number {
   const fromFouls = game.events.filter((e) => e.kind === 'PF').length;
   return Math.max(0, fromEvents + fromFouls);
 }
+
+/** ค่าสูงสุดของผู้นำแต่ละหมวด (คิดเฉพาะผู้เล่นจริง, ต้อง > 0 ถึงนับ) */
+export interface Leaders {
+  pts: number;
+  reb: number;
+  ast: number;
+}
+
+/**
+ * หาค่าสูงสุดของ PTS / REB / AST จาก "ผู้เล่นจริง" เท่านั้น (ไม่รวมแถว Team)
+ * ค่าเป็น 0 หมายถึง "ไม่มีผู้นำ" (จะได้ไม่ไปเน้นเลข 0)
+ * ใช้เทียบว่า cell ไหนควรไฮไลต์ leader (เสมอกันหลายคน = เน้นทุกคนที่เท่าค่านี้)
+ */
+export function computeLeaders(lines: PlayerLine[]): Leaders {
+  const max = (sel: (l: PlayerLine) => number) =>
+    lines.reduce((m, l) => Math.max(m, sel(l)), 0);
+  return {
+    pts: max((l) => l.pts),
+    reb: max((l) => l.reb),
+    ast: max((l) => l.ast),
+  };
+}

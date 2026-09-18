@@ -1,6 +1,6 @@
 import { useMemo, useRef, useState } from 'react';
 import type { Game } from '../types';
-import { computeBoxScore, computeOpponentScore, type PlayerLine } from '../lib/stats';
+import { computeBoxScore, computeOpponentScore, computeLeaders, type PlayerLine } from '../lib/stats';
 import { formatPeriod } from '../lib/format';
 import { shareBoxScore } from '../lib/share';
 
@@ -61,6 +61,8 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
   );
 
   const showTeamRow = box.teamLine.ast > 0 || box.teamLine.reb > 0;
+  // ค่าสูงสุดแต่ละหมวด (เฉพาะผู้เล่นจริง) ไว้ไฮไลต์ leader ในตาราง
+  const leaders = useMemo(() => computeLeaders(box.lines), [box.lines]);
 
   function renderRow(line: PlayerLine, label: string, extraClass = '') {
     return (
@@ -180,7 +182,14 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                     <td className="name">
                       #{p?.number} {p?.name}
                     </td>
-                    <td className="col-pts">{line.pts}</td>
+                    <td
+                      className={
+                        'col-pts' +
+                        (line.pts > 0 && line.pts === leaders.pts ? ' is-leader' : '')
+                      }
+                    >
+                      {line.pts}
+                    </td>
                     <td>
                       {line.fg2m + line.fg3m}/{line.fg2a + line.fg3a}
                     </td>
@@ -191,8 +200,20 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                       {line.fg3m}/{line.fg3a}
                     </td>
                     <td className="pct">{pct(line.fg3m, line.fg3a)}</td>
-                    <td>{line.reb}</td>
-                    <td>{line.ast}</td>
+                    <td
+                      className={
+                        line.reb > 0 && line.reb === leaders.reb ? 'is-leader' : undefined
+                      }
+                    >
+                      {line.reb}
+                    </td>
+                    <td
+                      className={
+                        line.ast > 0 && line.ast === leaders.ast ? 'is-leader' : undefined
+                      }
+                    >
+                      {line.ast}
+                    </td>
                     <td>{line.stl}</td>
                     <td>{line.blk}</td>
                     <td>{line.to}</td>
