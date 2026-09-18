@@ -29,9 +29,13 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
     try {
       const base = `Courtside_${game.teamName}_vs_${game.opponentName}_${game.date}`;
       const result = await shareBoxScore(captureRef.current, base);
-      if (result === 'downloaded') {
+      if (result === 'copied') {
         window.alert(
-          'บันทึกรูป Box Score ลงเครื่องแล้ว — เปิดรูปจากอัลบั้ม/ดาวน์โหลด แล้วส่งเข้า LINE ได้เลย\n(อุปกรณ์นี้แชร์เข้าแอปอื่นโดยตรงไม่ได้)',
+          'คัดลอกรูป Box Score แล้ว ✅\nเปิดแชท LINE แล้ว "วาง" (paste) เพื่อส่งได้เลย',
+        );
+      } else if (result === 'downloaded') {
+        window.alert(
+          'บันทึกรูป Box Score ลงเครื่องแล้ว ✅\nเปิดรูปจากอัลบั้ม/ดาวน์โหลด แล้วส่งเข้า LINE ได้เลย',
         );
       }
     } catch (err) {

@@ -25,9 +25,9 @@ async function elementToBlob(el: HTMLElement): Promise<Blob> {
 }
 
 /** ผลลัพธ์ของการแชร์ */
-export type ShareResult = 'shared' | 'canceled' | 'downloaded' | 'unsupported';
+export type ShareResult = 'shared' | 'canceled' | 'copied' | 'downloaded' | 'unsupported';
 
-/** ดาวน์โหลดไฟล์เป็น fallback เมื่อแชร์ไฟล์ผ่าน Web Share API ไม่ได้ */
+/** ดาวน์โหลดไฟล์เป็น fallback สุดท้าย */
 function downloadBlob(blob: Blob, fileName: string): void {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
@@ -39,10 +39,26 @@ function downloadBlob(blob: Blob, fileName: string): void {
   URL.revokeObjectURL(url);
 }
 
+/** คัดลอกรูปเข้า clipboard (ให้ผู้ใช้ไปวางในแชท LINE ได้เลย) — คืน true ถ้าสำเร็จ */
+async function copyBlobToClipboard(blob: Blob): Promise<boolean> {
+  try {
+    const nav = navigator as Navigator & {
+      clipboard?: { write?: (items: ClipboardItem[]) => Promise<void> };
+    };
+    if (!nav.clipboard?.write || typeof ClipboardItem === 'undefined') return false;
+    await nav.clipboard.write([new ClipboardItem({ 'image/png': blob })]);
+    return true;
+  } catch (err) {
+    console.warn('[share] clipboard copy failed:', err);
+    return false;
+  }
+}
+
 /**
- * แชร์รูป box score เข้าแอปอื่น (เช่น LINE) ผ่าน Web Share API
- * - อุปกรณ์ที่รองรับแชร์ไฟล์ (iPad/มือถือ) -> เด้ง share sheet เลือกส่ง LINE ได้ตรงๆ
- * - ไม่รองรับ -> ดาวน์โหลดรูปแทน (คืน 'downloaded') ให้ผู้ใช้เซฟแล้วส่งเข้า LINE เอง
+ * แชร์รูป box score เข้าแอปอื่น (เช่น LINE) — ไล่ทางที่ดีที่สุดที่อุปกรณ์รองรับ:
+ * 1) Web Share API แชร์ไฟล์ (Safari iOS/Android) -> เด้ง share sheet เลือก LINE ได้ตรง
+ * 2) คัดลอกรูปเข้า clipboard (Edge/Chrome iPad ฯลฯ) -> ไปวางในแชท LINE ได้เลย
+ * 3) ดาวน์โหลดรูป (ทางสุดท้าย) -> เซฟแล้วแชร์เอง
  */
 export async function shareBoxScore(
   el: HTMLElement,
@@ -57,21 +73,25 @@ export async function shareBoxScore(
     share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
   };
 
-  // ถ้าแชร์ "ไฟล์" ได้ -> ใช้ Web Share API (เด้ง share sheet ส่ง LINE)
-  if (nav.share && nav.canShare && nav.canShare({ files: [file] })) {
+  // 1) ลองแชร์ไฟล์ผ่าน Web Share API ก่อน (ดีที่สุด: ส่งเข้า LINE ตรง)
+  if (nav.share && (!nav.canShare || nav.canShare({ files: [file] }))) {
     try {
       await nav.share({ files: [file], title: fileBase });
       return 'shared';
     } catch (err) {
-      // ผู้ใช้กดยกเลิก share sheet
       if (err instanceof DOMException && err.name === 'AbortError') return 'canceled';
-      // แชร์ล้มเหลวด้วยเหตุอื่น -> ตกไปดาวน์โหลดแทน กันผู้ใช้ทำอะไรไม่ได้
-      downloadBlob(blob, fileName);
-      return 'downloaded';
+      console.warn('[share] navigator.share({files}) failed:', err);
+      // ตกไปลองวิธีถัดไป
     }
   }
 
-  // อุปกรณ์/เบราว์เซอร์ไม่รองรับแชร์ไฟล์ -> ดาวน์โหลดรูปแทน
+  // 2) คัดลอกรูปเข้า clipboard (Edge/Chrome บน iPad ฯลฯ) -> ไปวางในแชท LINE
+  if (await copyBlobToClipboard(blob)) {
+    return 'copied';
+  }
+
+  // 3) ทางสุดท้าย: ดาวน์โหลดรูป
+  console.warn('[share] fallback to download');
   downloadBlob(blob, fileName);
   return 'downloaded';
 }

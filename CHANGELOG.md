@@ -3,6 +3,15 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.5] - 2026-09-18
+
+### Added
+- แชร์รูป Box Score: เพิ่มการ **คัดลอกรูปเข้า clipboard** เป็นทางเลือกเมื่อแชร์ไฟล์ตรงไม่ได้ (เช่น Edge/Chrome บน iPad) — ไปวาง (paste) ในแชท LINE ได้เลย
+
+### Changed
+- ลำดับการแชร์: Web Share (Safari) → Copy clipboard (Edge/Chrome) → Download (ทางสุดท้าย)
+- เปลี่ยนสีไฮไลต์ผู้นำในตาราง (REB/AST) เป็นสีฟ้า ให้ต่างจากสีทั่วไปแต่ไม่จัดจ้าน
+
 ## [0.3.4] - 2026-09-18
 
 ### Fixed
@@ -60,6 +69,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.5]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.5
 [0.3.4]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.4
 [0.3.3]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.3
 [0.3.2]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.2

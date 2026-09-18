@@ -1270,7 +1270,7 @@ button {
 .full-box tbody td.is-leader {
   position: relative;
   font-weight: 800;
-  color: var(--text);
+  color: #38bdf8;
 }
 .full-box tbody td.is-leader::after {
   content: '';
@@ -1281,11 +1281,14 @@ button {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: var(--team);
+  background: #38bdf8;
 }
-/* PTS ที่เป็นผู้นำ: คงสีส้มเด่นอยู่แล้ว แค่ทำจุดให้เข้ากัน */
+/* PTS ที่เป็นผู้นำ: คง col-pts เป็นสีทีม (ส้ม) แต่จุดใช้สี leader ให้สื่อว่าเป็นผู้นำ */
+.full-box tbody td.col-pts.is-leader {
+  color: var(--team);
+}
 .full-box tbody td.col-pts.is-leader::after {
-  background: var(--team);
+  background: #38bdf8;
 }
 
 /* ---------- iPad / responsive ---------- */
