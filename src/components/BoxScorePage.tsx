@@ -1,8 +1,8 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import type { Game } from '../types';
 import { computeBoxScore, computeOpponentScore, computeLeaders, type PlayerLine } from '../lib/stats';
 import { formatPeriod } from '../lib/format';
-import { shareBoxScore } from '../lib/share';
+import { shareBoxScore, shareImageBlob, elementToBlob } from '../lib/share';
 import { buildBoxScoreCsv, downloadCsv } from '../lib/export';
 
 interface Props {
@@ -23,13 +23,45 @@ function pct(made: number, att: number): string {
 export function BoxScorePage({ game, archived = false, onBack, onResume }: Props) {
   const captureRef = useRef<HTMLDivElement>(null);
   const [sharing, setSharing] = useState(false);
+  // blob รูปที่เตรียมไว้ล่วงหน้า เพื่อให้กด Share แล้วเรียก navigator.share ได้ทันที
+  // (สำคัญบน iOS/Safari: ถ้า await html2canvas ใน gesture จะโดนบล็อก share)
+  const preparedRef = useRef<Blob | null>(null);
+
+  // เตรียมรูปล่วงหน้าเมื่อข้อมูลเปลี่ยน (ไม่ block UI ทำเงียบๆ เบื้องหลัง)
+  useEffect(() => {
+    let cancelled = false;
+    preparedRef.current = null;
+    const el = captureRef.current;
+    if (!el) return;
+    // หน่วงเล็กน้อยให้ DOM/ฟอนต์ render ก่อน
+    const t = window.setTimeout(() => {
+      elementToBlob(el)
+        .then((blob) => {
+          if (!cancelled) preparedRef.current = blob;
+        })
+        .catch(() => {
+          /* เตรียมไม่สำเร็จ — ตอนกดจะ generate ใหม่ */
+        });
+    }, 150);
+    return () => {
+      cancelled = true;
+      window.clearTimeout(t);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [game.events, game.players, game.opponentEvents, game.clock.quarter]);
 
   async function handleShare() {
     if (!captureRef.current || sharing) return;
     setSharing(true);
     try {
       const base = `Courtside_${game.teamName}_vs_${game.opponentName}_${game.date}`;
-      const result = await shareBoxScore(captureRef.current, base);
+      // ถ้ามี blob เตรียมไว้แล้ว -> แชร์ทันที (รักษา user gesture บน iOS)
+      let result;
+      if (preparedRef.current) {
+        result = await shareImageBlob(preparedRef.current, base);
+      } else {
+        result = await shareBoxScore(captureRef.current, base);
+      }
       if (result === 'copied') {
         window.alert(
           'คัดลอกรูป Box Score แล้ว ✅\nเปิดแชท LINE แล้ว "วาง" (paste) เพื่อส่งได้เลย',

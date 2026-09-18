@@ -6,7 +6,7 @@ function safeName(s: string): string {
 }
 
 /** render element เป็น PNG blob ด้วย html2canvas */
-async function elementToBlob(el: HTMLElement): Promise<Blob> {
+export async function elementToBlob(el: HTMLElement): Promise<Blob> {
   // อ่านสีพื้นหลังจริงของหน้า เพื่อไม่ให้รูปออกมาพื้นโปร่ง/ขาว
   const bg =
     getComputedStyle(document.body).backgroundColor || '#0d0f14';
@@ -74,19 +74,17 @@ export async function shareBoxScore(
   };
 
   // 1) ลองแชร์ไฟล์ผ่าน Web Share API ก่อน (ดีที่สุด: เด้ง share sheet เลือก LINE ตรง)
-  //    ไม่ gate ด้วย canShare เข้มงวด — ถ้า canShare บอก true ก็ลอง, ถ้าไม่มี canShare ก็ลองเลย
-  //    (บางเบราว์เซอร์ canShare ให้ false แต่ share({files}) ทำงานได้จริง)
+  //    ลอง share({files}) เลยถ้ามี navigator.share — ไม่ gate ด้วย canShare
+  //    เพราะบน Safari/iPad บางกรณี canShare({files}) คืน false ทั้งที่ share ได้จริง
+  //    ถ้าเบราว์เซอร์ไม่รองรับไฟล์จริง share() จะ throw แล้วเราค่อย fallback
   if (nav.share) {
-    const canFiles = nav.canShare ? nav.canShare({ files: [file] }) : true;
-    if (canFiles) {
-      try {
-        await nav.share({ files: [file], title: fileBase });
-        return 'shared';
-      } catch (err) {
-        if (err instanceof DOMException && err.name === 'AbortError') return 'canceled';
-        console.warn('[share] navigator.share({files}) failed:', err);
-        // ตกไปลองวิธีถัดไป
-      }
+    try {
+      await nav.share({ files: [file], title: fileBase });
+      return 'shared';
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return 'canceled';
+      console.warn('[share] navigator.share({files}) failed:', err);
+      // ตกไปลองวิธีถัดไป (clipboard / download)
     }
   }
 
@@ -97,6 +95,36 @@ export async function shareBoxScore(
 
   // 3) ทางสุดท้าย: ดาวน์โหลดรูป
   console.warn('[share] fallback to download');
+  downloadBlob(blob, fileName);
+  return 'downloaded';
+}
+
+/**
+ * แชร์รูปจาก blob ที่ "เตรียมไว้ล่วงหน้าแล้ว" — เรียกได้ทันทีใน user gesture (กดปุ่ม)
+ * โดยไม่มี await html2canvas คั่น จึงรักษา transient user activation ของ iOS/Safari ไว้
+ * ทำให้ navigator.share({files}) ไม่ถูกบล็อก และเด้ง share sheet เลือก LINE ได้ตรง
+ */
+export async function shareImageBlob(
+  blob: Blob,
+  fileBase: string,
+): Promise<ShareResult> {
+  const fileName = `${safeName(fileBase)}.png`;
+  const file = new File([blob], fileName, { type: 'image/png' });
+  const nav = navigator as Navigator & {
+    canShare?: (data: { files: File[] }) => boolean;
+    share?: (data: { files?: File[]; title?: string; text?: string }) => Promise<void>;
+  };
+
+  if (nav.share) {
+    try {
+      await nav.share({ files: [file], title: fileBase });
+      return 'shared';
+    } catch (err) {
+      if (err instanceof DOMException && err.name === 'AbortError') return 'canceled';
+      console.warn('[share] shareImageBlob: navigator.share failed:', err);
+    }
+  }
+  if (await copyBlobToClipboard(blob)) return 'copied';
   downloadBlob(blob, fileName);
   return 'downloaded';
 }

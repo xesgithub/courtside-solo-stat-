@@ -3,6 +3,11 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.9] - 2026-09-18
+
+### Fixed
+- ปุ่ม Share บน iPad/Safari: เตรียมรูปไว้ล่วงหน้า (pre-generate) แล้วเรียก `navigator.share` ทันทีตอนกดปุ่ม เพื่อรักษา user gesture ของ iOS ไม่ให้ share ถูกบล็อก — ทำให้เด้ง share sheet เลือกส่ง LINE ได้ตรง (เดิมตกไป copy เพราะ html2canvas ทำงานนานก่อน share)
+
 ## [0.3.8] - 2026-09-18
 
 ### Fixed
@@ -88,6 +93,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.9]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.9
 [0.3.8]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.8
 [0.3.7]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.7
 [0.3.6]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.6
