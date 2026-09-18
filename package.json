@@ -1,7 +1,7 @@
 {
   "name": "courtside-solo-stat",
   "private": true,
-  "version": "0.3.5",
+  "version": "0.3.6",
   "type": "module",
   "description": "COURTSIDE — Solo Stat: แอปจดสถิติบาสเกตบอล Live สำหรับคนจดคนเดียว จัดการหลายแมตช์ต่อวันด้วยเวลาแข่ง, History, Box Score, แชร์รูป และสำรอง/ย้ายข้อมูลด้วย Export/Import JSON",
   "license": "MIT",

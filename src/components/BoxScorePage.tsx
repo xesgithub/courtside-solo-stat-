@@ -3,6 +3,7 @@ import type { Game } from '../types';
 import { computeBoxScore, computeOpponentScore, computeLeaders, type PlayerLine } from '../lib/stats';
 import { formatPeriod } from '../lib/format';
 import { shareBoxScore } from '../lib/share';
+import { buildBoxScoreCsv, downloadCsv } from '../lib/export';
 
 interface Props {
   game: Game;
@@ -68,6 +69,20 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
   // ค่าสูงสุดแต่ละหมวด (เฉพาะผู้เล่นจริง) ไว้ไฮไลต์ leader ในตาราง
   const leaders = useMemo(() => computeLeaders(box.lines), [box.lines]);
 
+  /** Export CSV — กดครั้งเดียวดาวน์โหลด (เปิดใน Excel/Google Sheets) */
+  function handleExportCsv() {
+    const nameOf = (id: string) => {
+      const p = nameById.get(id);
+      return p ? `#${p.number} ${p.name}` : 'Player';
+    };
+    const csv = buildBoxScoreCsv(game, box, opponentScore, nameOf);
+    const safe = `${game.teamName}_vs_${game.opponentName}_${game.date}`.replace(
+      /[^\w\u0E00-\u0E7F-]+/g,
+      '_',
+    );
+    downloadCsv(csv, `Courtside_${safe}.csv`);
+  }
+
   function renderRow(line: PlayerLine, label: string, extraClass = '') {
     return (
       <tr className={extraClass}>
@@ -126,6 +141,13 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
       )}
 
       <div className="box-toolbar">
+        <button
+          className="box-csv"
+          onClick={handleExportCsv}
+          title="Export CSV (เปิดใน Excel / Google Sheets)"
+        >
+          ⬇ CSV
+        </button>
         <button
           className="box-share"
           onClick={handleShare}

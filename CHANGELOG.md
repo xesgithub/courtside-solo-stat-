@@ -3,6 +3,14 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.6] - 2026-09-18
+
+### Added
+- **Export CSV** ในหน้า Box Score — กดปุ่มเดียวดาวน์โหลดตารางสถิติ (เปิดใน Excel / Google Sheets) รองรับภาษาไทย (BOM) และ escape ค่าถูกต้อง
+
+### Changed
+- เปลี่ยนสีธีมทีมเราจากส้มเป็น **teal** (`#14b8a6`) ให้ดูโดดเด่นไม่ซ้ำใคร; ปรับสีไฮไลต์ผู้นำในตารางเป็นเหลือง (amber) ให้ตัดกับ teal
+
 ## [0.3.5] - 2026-09-18
 
 ### Added
@@ -69,6 +77,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.6]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.6
 [0.3.5]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.5
 [0.3.4]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.4
 [0.3.3]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.3
