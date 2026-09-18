@@ -23,7 +23,11 @@ interface Props {
   onTeamDelta: (delta: number) => void;
   onOpponentDelta: (delta: number) => void;
   onReorderPlayers: (fromId: string, toId: string) => void;
-  onUpdateTeamInfo: (patch: { teamName?: string; opponentName?: string }) => void;
+  onUpdateTeamInfo: (patch: {
+    teamName?: string;
+    opponentName?: string;
+    scheduledAt?: number;
+  }) => void;
   onUpdatePlayer: (id: string, patch: Partial<Pick<Player, 'name' | 'number'>>) => void;
   onAddPlayer: (name: string, number: string) => void;
   onRemovePlayer: (id: string) => void;
@@ -196,6 +200,7 @@ export function LivePage({
         <TeamEditModal
           teamName={game.teamName}
           opponentName={game.opponentName}
+          scheduledAt={game.scheduledAt}
           players={game.players}
           onUpdateTeamInfo={onUpdateTeamInfo}
           onUpdatePlayer={onUpdatePlayer}

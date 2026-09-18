@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { archiveGame, deleteSavedGame, loadSavedGames } from '../lib/storage';
 import { createGame } from '../lib/mock';
+import { matchTimeOf } from '../lib/format';
 import type { Game } from '../types';
 
 /** สร้างเกมเปล่าสำหรับทดสอบ (ยังไม่มี event) */
@@ -96,5 +97,43 @@ describe('history list & delete rules', () => {
     // กติกาเดียวกับใน ReviewPage: canDelete = !!game.finished
     expect(!!notFinished.finished).toBe(false);
     expect(!!finished.finished).toBe(true);
+  });
+});
+
+describe('match time & ordering', () => {
+  it('createGame เซ็ต scheduledAt ตามที่ระบุ และ date ตรงกับวันนั้น', () => {
+    const at = new Date('2026-09-18T14:30:00').getTime();
+    const g = createGame({
+      teamName: 'A',
+      opponentName: 'B',
+      minutesPerQuarter: 10,
+      quarters: 4,
+      scheduledAt: at,
+      players: [{ number: '4', name: 'X' }],
+    });
+    expect(g.scheduledAt).toBe(at);
+    expect(g.date).toBe('2026-09-18');
+  });
+
+  it('matchTimeOf: ใช้ scheduledAt ก่อน แล้ว fallback ไป date/createdAt', () => {
+    // มี scheduledAt
+    expect(matchTimeOf({ scheduledAt: 123, date: '2020-01-01', createdAt: 999 })).toBe(123);
+    // ไม่มี scheduledAt -> ใช้ date
+    const byDate = matchTimeOf({ date: '2026-09-18', createdAt: 999 });
+    expect(byDate).toBe(new Date('2026-09-18T00:00:00').getTime());
+    // ไม่มีทั้ง scheduledAt/date -> createdAt
+    expect(matchTimeOf({ createdAt: 777 })).toBe(777);
+  });
+
+  it('เรียงเกมตามเวลาแข่ง ใหม่สุดอยู่บนสุด', () => {
+    const early = makeGame('Early');
+    early.scheduledAt = new Date('2026-09-18T09:00:00').getTime();
+    const late = makeGame('Late');
+    late.scheduledAt = new Date('2026-09-18T13:00:00').getTime();
+    const mid = makeGame('Mid');
+    mid.scheduledAt = new Date('2026-09-18T11:00:00').getTime();
+
+    const sorted = [early, late, mid].sort((a, b) => matchTimeOf(b) - matchTimeOf(a));
+    expect(sorted.map((g) => g.teamName)).toEqual(['Late', 'Mid', 'Early']);
   });
 });

@@ -1,11 +1,17 @@
 import { useState } from 'react';
 import type { Player } from '../types';
+import { toDatetimeLocalValue } from '../lib/format';
 
 interface Props {
   teamName: string;
   opponentName: string;
+  scheduledAt?: number;
   players: Player[];
-  onUpdateTeamInfo: (patch: { teamName?: string; opponentName?: string }) => void;
+  onUpdateTeamInfo: (patch: {
+    teamName?: string;
+    opponentName?: string;
+    scheduledAt?: number;
+  }) => void;
   onUpdatePlayer: (id: string, patch: Partial<Pick<Player, 'name' | 'number'>>) => void;
   onAddPlayer: (name: string, number: string) => void;
   onRemovePlayer: (id: string) => void;
@@ -15,6 +21,7 @@ interface Props {
 export function TeamEditModal({
   teamName,
   opponentName,
+  scheduledAt,
   players,
   onUpdateTeamInfo,
   onUpdatePlayer,
@@ -60,6 +67,24 @@ export function TeamEditModal({
               value={opponentName}
               onChange={(e) => onUpdateTeamInfo({ opponentName: e.target.value })}
               placeholder="Opponent name"
+            />
+          </label>
+        </div>
+
+        {/* Match date & time — แก้เวลาแข่งย้อนหลังได้ */}
+        <div className="edit-teams">
+          <label className="edit-field">
+            <span className="edit-field__label">Match date &amp; time</span>
+            <input
+              className="edit-input"
+              type="datetime-local"
+              value={toDatetimeLocalValue(
+                typeof scheduledAt === 'number' ? scheduledAt : Date.now(),
+              )}
+              onChange={(e) => {
+                const ms = e.target.value ? new Date(e.target.value).getTime() : NaN;
+                if (!Number.isNaN(ms)) onUpdateTeamInfo({ scheduledAt: ms });
+              }}
             />
           </label>
         </div>

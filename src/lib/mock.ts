@@ -11,6 +11,8 @@ export interface NewGameConfig {
   opponentName: string;
   minutesPerQuarter: number;
   quarters: number;
+  /** วัน-เวลาแข่ง (epoch ms) — ถ้าไม่ระบุจะใช้ "ตอนนี้" */
+  scheduledAt?: number;
   /** ชื่อ+เบอร์ผู้เล่น (ไม่ต้องมี id — สร้างให้เอง) */
   players: { number: string; name: string; isStarter?: boolean }[];
 }
@@ -48,6 +50,11 @@ export const DUMMY_NEW_GAME: NewGameConfig = {
 export function createGame(config: NewGameConfig): Game {
   const minutesPerQuarter = Math.max(1, Math.round(config.minutesPerQuarter));
   const quarters = Math.max(1, Math.round(config.quarters));
+  // เวลาแข่ง: ใช้ค่าที่ตั้งมา ไม่งั้น default = ตอนนี้
+  const scheduledAt =
+    typeof config.scheduledAt === 'number' && !Number.isNaN(config.scheduledAt)
+      ? config.scheduledAt
+      : Date.now();
   const players: Player[] = config.players.map((p) => ({
     id: uid(),
     number: p.number.trim(),
@@ -57,7 +64,9 @@ export function createGame(config: NewGameConfig): Game {
   return {
     id: uid(),
     name: 'Game',
-    date: new Date().toISOString().slice(0, 10),
+    // date ให้ตรงกับวันของ scheduledAt (คงไว้เพื่อชื่อไฟล์/ข้อมูลเก่า)
+    date: new Date(scheduledAt).toISOString().slice(0, 10),
+    scheduledAt,
     config: { quarters, minutesPerQuarter },
     teamName: config.teamName.trim() || 'Our team',
     opponentName: config.opponentName.trim() || 'Opponent',

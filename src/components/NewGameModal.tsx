@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { DEFAULT_NEW_GAME, type NewGameConfig } from '../lib/mock';
+import { toDatetimeLocalValue } from '../lib/format';
 
 interface Props {
   onCreate: (config: NewGameConfig) => void;
@@ -16,6 +17,8 @@ export function NewGameModal({ onCreate, onClose }: Props) {
   const [quarters, setQuarters] = useState(String(DEFAULT_NEW_GAME.quarters));
   // จำนวนผู้เล่นที่จะสร้างอัตโนมัติ (default 8)
   const [playerCount, setPlayerCount] = useState('8');
+  // วัน-เวลาแข่ง (default = ตอนนี้) — ใช้แยกแมตช์วันเดียวกันหลายคู่
+  const [matchAt, setMatchAt] = useState(() => toDatetimeLocalValue(Date.now()));
 
   function handleCreate() {
     // สร้างผู้เล่นอัตโนมัติตามจำนวน: เบอร์เริ่มที่ 4, ชื่อ "Player N"
@@ -26,11 +29,16 @@ export function NewGameModal({ onCreate, onClose }: Props) {
       name: `Player ${i + 1}`,
     }));
 
+    // แปลงค่า datetime-local -> epoch ms (ถ้าว่าง/พัง ใช้ตอนนี้)
+    const parsed = matchAt ? new Date(matchAt).getTime() : Date.now();
+    const scheduledAt = Number.isNaN(parsed) ? Date.now() : parsed;
+
     onCreate({
       teamName: teamName.trim(),
       opponentName: opponentName.trim(),
       minutesPerQuarter: clampNum(minutes, 12, 1, 60),
       quarters: clampNum(quarters, 4, 1, 12),
+      scheduledAt,
       players,
     });
   }
@@ -58,6 +66,19 @@ export function NewGameModal({ onCreate, onClose }: Props) {
               value={opponentName}
               onChange={(e) => setOpponentName(e.target.value)}
               placeholder="Opponent name"
+            />
+          </label>
+        </div>
+
+        {/* Match date & time — ใช้แยกแมตช์วันเดียวกันหลายคู่ */}
+        <div className="edit-teams">
+          <label className="edit-field">
+            <span className="edit-field__label">Match date &amp; time</span>
+            <input
+              className="edit-input"
+              type="datetime-local"
+              value={matchAt}
+              onChange={(e) => setMatchAt(e.target.value)}
             />
           </label>
         </div>

@@ -64,7 +64,10 @@ export interface GameConfig {
 export interface Game {
   id: string;
   name: string;
-  date: string; // ISO date (YYYY-MM-DD)
+  date: string; // ISO date (YYYY-MM-DD) — คงไว้เพื่อ backward-compat/ชื่อไฟล์
+  /** วัน-เวลาแข่ง (epoch ms) — แหล่งความจริงหลักของเวลาแข่ง ตั้ง/แก้ได้เอง
+   *  เกมเก่าที่ไม่มีค่านี้ ให้ fallback ไปใช้ date/createdAt */
+  scheduledAt?: number;
   config: GameConfig;
   teamName: string; // ชื่อทีมเรา
   opponentName: string; // ชื่อคู่แข่ง

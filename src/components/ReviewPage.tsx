@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import type { Game } from '../types';
 import { computeBoxScore, computeOpponentScore } from '../lib/stats';
+import { matchTimeOf, formatMatchDateTime } from '../lib/format';
 
 interface Props {
   /** เกมปัจจุบัน (แสดงบนสุดเป็นแถวพิเศษ) */
@@ -67,7 +68,7 @@ export function ReviewPage({ currentGame, savedGames, onOpen, onResume, onDelete
                         <b className="opp">{game.opponentName}</b>
                       </span>
                       <span className="history-item__meta">
-                        {game.date}
+                        {formatMatchDateTime(matchTimeOf(game))}
                         {isActive && (
                           <span className="history-item__badge editing">🟢 Editing now</span>
                         )}

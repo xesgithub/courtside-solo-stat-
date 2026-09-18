@@ -6,6 +6,7 @@ import { ReviewPage } from './components/ReviewPage';
 import { NewGameModal } from './components/NewGameModal';
 import { createMockGame, createGame, uid, type NewGameConfig } from './lib/mock';
 import { computeBoxScore, computeOpponentScore } from './lib/stats';
+import { matchTimeOf } from './lib/format';
 import {
   loadGame,
   saveGame,
@@ -40,11 +41,12 @@ export default function App() {
     [viewingGame],
   );
 
-  // รายการที่แสดงใน History = เกม active (บนสุด) + เกมในคลัง โดยไม่ให้ id ซ้ำ
-  // (เกม active ยัง auto-save แยกใน currentGame; รวมตรงนี้เพื่อให้ History เห็นทุกเกม)
+  // รายการที่แสดงใน History = เกม active + เกมในคลัง โดยไม่ให้ id ซ้ำ
+  // เรียงตามเวลาแข่ง (scheduledAt) ใหม่สุดอยู่บนสุดเสมอ
   const historyGames = useMemo(() => {
     const rest = savedGames.filter((g) => g.id !== game.id);
-    return [game, ...rest];
+    const all = [game, ...rest];
+    return all.sort((a, b) => matchTimeOf(b) - matchTimeOf(a));
   }, [game, savedGames]);
 
   // auto-save ลง localStorage — เขียน "ทันที" ทุกครั้งที่ game เปลี่ยน
@@ -148,9 +150,20 @@ export default function App() {
     });
   }
 
-  function updateTeamInfo(patch: { teamName?: string; opponentName?: string }) {
+  function updateTeamInfo(patch: {
+    teamName?: string;
+    opponentName?: string;
+    scheduledAt?: number;
+  }) {
     if (game.finished) return;
-    setGame((g) => ({ ...g, ...patch, updatedAt: Date.now() }));
+    setGame((g) => {
+      const next = { ...g, ...patch, updatedAt: Date.now() };
+      // ถ้าแก้เวลาแข่ง ให้ date ตามวันของ scheduledAt ด้วย (คงความสอดคล้อง)
+      if (typeof patch.scheduledAt === 'number' && !Number.isNaN(patch.scheduledAt)) {
+        next.date = new Date(patch.scheduledAt).toISOString().slice(0, 10);
+      }
+      return next;
+    });
   }
 
   function updatePlayer(id: string, patch: Partial<Pick<Player, 'name' | 'number'>>) {
