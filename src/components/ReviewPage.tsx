@@ -20,7 +20,7 @@ function scoreOf(game: Game): { team: number; opp: number } {
   return { team: box.teamScore, opp: computeOpponentScore(game) };
 }
 
-export function ReviewPage({ savedGames, onOpen, onResume, onDelete }: Props) {
+export function ReviewPage({ currentGame, savedGames, onOpen, onResume, onDelete }: Props) {
   const rows = useMemo(
     () =>
       savedGames.map((g) => ({
@@ -46,8 +46,15 @@ export function ReviewPage({ savedGames, onOpen, onResume, onDelete }: Props) {
             {rows.map(({ game, team, opp }) => {
               const win = team > opp;
               const loss = team < opp;
+              // แถวที่เป็นเกมที่กำลังแก้อยู่ตอนนี้
+              const isActive = game.id === currentGame.id;
+              // ลบได้เฉพาะเกมที่ End game (finished) แล้วเท่านั้น
+              const canDelete = !!game.finished;
               return (
-                <li key={game.id} className="history-item">
+                <li
+                  key={game.id}
+                  className={'history-item' + (isActive ? ' history-item--active' : '')}
+                >
                   <button
                     className="history-item__main"
                     onClick={() => onOpen(game.id)}
@@ -61,6 +68,9 @@ export function ReviewPage({ savedGames, onOpen, onResume, onDelete }: Props) {
                       </span>
                       <span className="history-item__meta">
                         {game.date}
+                        {isActive && (
+                          <span className="history-item__badge editing">🟢 Editing now</span>
+                        )}
                         {game.finished && (
                           <span className="history-item__badge">🔒 Finished</span>
                         )}
@@ -79,6 +89,11 @@ export function ReviewPage({ savedGames, onOpen, onResume, onDelete }: Props) {
                   <button
                     className="history-item__resume"
                     onClick={() => {
+                      if (isActive) {
+                        // เกมที่กำลังแก้อยู่แล้ว — กลับไป Live ทันที ไม่ต้องถาม
+                        onResume(game.id);
+                        return;
+                      }
                       if (
                         window.confirm(
                           `Resume "${game.teamName} vs ${game.opponentName}" (${game.date}) to edit / keep scoring? Your current game will be saved to History first.`,
@@ -86,14 +101,16 @@ export function ReviewPage({ savedGames, onOpen, onResume, onDelete }: Props) {
                       )
                         onResume(game.id);
                     }}
-                    aria-label="Resume and edit game"
-                    title="Resume / edit"
+                    aria-label={isActive ? 'Back to editing' : 'Resume and edit game'}
+                    title={isActive ? 'Back to Live (editing now)' : 'Resume / edit'}
                   >
                     ▶
                   </button>
                   <button
                     className="history-item__del"
+                    disabled={!canDelete}
                     onClick={() => {
+                      if (!canDelete) return;
                       if (
                         window.confirm(
                           `Delete "${game.teamName} vs ${game.opponentName}" (${game.date}) permanently?`,
@@ -102,7 +119,7 @@ export function ReviewPage({ savedGames, onOpen, onResume, onDelete }: Props) {
                         onDelete(game.id);
                     }}
                     aria-label="Delete saved game"
-                    title="Delete"
+                    title={canDelete ? 'Delete' : 'End game first to delete'}
                   >
                     🗑
                   </button>

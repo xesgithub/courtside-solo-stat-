@@ -1656,20 +1656,34 @@ button {
 .history-item__resume:active {
   transform: scale(0.94);
 }
-
-/* เลข version แบบหลบๆ มุมล่างขวา — จางมาก ไม่รบกวนสายตา */
-.app-version {
-  position: fixed;
-  right: 6px;
-  bottom: 4px;
-  font-size: 10px;
-  line-height: 1;
-  color: var(--text-faint);
+/* ปุ่มลบตอนกดไม่ได้ (ยังไม่ End game) — จางลงและห้ามคลิก */
+.history-item__del:disabled {
   opacity: 0.35;
+  cursor: not-allowed;
+  filter: none;
+}
+.history-item__del:disabled:active {
+  transform: none;
+}
+/* แถวเกมที่กำลังแก้อยู่ตอนนี้ — เน้นขอบสีทีม */
+.history-item--active .history-item__main {
+  border-color: var(--team);
+  box-shadow: inset 0 0 0 1px var(--team);
+}
+/* badge "กำลังแก้อยู่" */
+.history-item__badge.editing {
+  color: var(--team);
+  font-weight: 700;
+}
+
+/* เลข version ต่อท้าย "The Solo Stat Desk" ที่แถบซ้ายบน */
+.brand__version {
+  margin-left: 6px;
+  font-size: 10px;
+  color: var(--text-faint);
+  opacity: 0.6;
   font-variant-numeric: tabular-nums;
-  pointer-events: none;
-  user-select: none;
-  z-index: 1;
+  vertical-align: baseline;
 }
 
 /* ---------- Clock (กดที่นาฬิกาเพื่อแก้เวลา/quarter) ---------- */

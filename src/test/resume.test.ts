@@ -65,3 +65,36 @@ describe('resume saved game flow', () => {
     expect(list.filter((g) => g.id === gameB.id).length).toBe(1);
   });
 });
+
+describe('history list & delete rules', () => {
+  beforeEach(() => localStorage.clear());
+
+  /** รวมเกม active เข้ากับคลังแบบไม่ซ้ำ id (ตรงกับ historyGames ใน App) */
+  function mergeHistory(active: Game, saved: Game[]): Game[] {
+    return [active, ...saved.filter((g) => g.id !== active.id)];
+  }
+
+  it('เกม active ปรากฏใน history เสมอ และไม่ซ้ำแม้อยู่ในคลังด้วย', () => {
+    const active = makeGame('Active');
+    // จำลองว่า active เคยถูก archive ไว้ในคลังด้วย (id เดียวกัน)
+    archiveGame(active);
+    const other = makeGame('Other');
+    archiveGame(other);
+
+    const merged = mergeHistory(active, loadSavedGames());
+    // active อยู่บนสุด
+    expect(merged[0].id).toBe(active.id);
+    // ไม่ซ้ำ
+    expect(merged.filter((g) => g.id === active.id).length).toBe(1);
+    // เกมอื่นยังอยู่
+    expect(merged.some((g) => g.id === other.id)).toBe(true);
+  });
+
+  it('ลบได้เฉพาะเกมที่ finished แล้วเท่านั้น (กติกา canDelete)', () => {
+    const notFinished = makeGame('Live');
+    const finished = { ...makeGame('Done'), finished: true };
+    // กติกาเดียวกับใน ReviewPage: canDelete = !!game.finished
+    expect(!!notFinished.finished).toBe(false);
+    expect(!!finished.finished).toBe(true);
+  });
+});

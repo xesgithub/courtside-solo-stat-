@@ -40,6 +40,13 @@ export default function App() {
     [viewingGame],
   );
 
+  // รายการที่แสดงใน History = เกม active (บนสุด) + เกมในคลัง โดยไม่ให้ id ซ้ำ
+  // (เกม active ยัง auto-save แยกใน currentGame; รวมตรงนี้เพื่อให้ History เห็นทุกเกม)
+  const historyGames = useMemo(() => {
+    const rest = savedGames.filter((g) => g.id !== game.id);
+    return [game, ...rest];
+  }, [game, savedGames]);
+
   // auto-save ลง localStorage — เขียน "ทันที" ทุกครั้งที่ game เปลี่ยน
   // (localStorage.setItem เร็วมาก ไม่ต้อง debounce; กัน race ตอน refresh เร็วๆ แล้วข้อมูลหาย)
   useEffect(() => {
@@ -256,18 +263,32 @@ export default function App() {
     setTab('live');
   }
 
-  /** ลบเกมออกจากคลัง */
+  /**
+   * ลบเกมออกจากคลัง (History)
+   * - ปกติ: ลบออกจาก savedGames
+   * - ถ้าเป็นเกมที่ active อยู่ (โชว์ใน History ด้วย): แทนที่เกม active ด้วยเกมใหม่
+   *   เพื่อไม่ให้มันถูก auto-save กลับเข้ามาใหม่ (ปุ่มลบเปิดเฉพาะเกม finished อยู่แล้ว)
+   */
   function removeSavedGame(id: string) {
     const list = deleteSavedGame(id);
     setSavedGames(list);
     if (viewingId === id) setViewingId(null);
+    if (id === game.id) {
+      // เกมที่ลบคือเกม active — เริ่มเกมใหม่แทน (กันมันเด้งกลับมาใน History)
+      const fresh = createMockGame();
+      setGame(fresh);
+      saveGame(fresh);
+      setViewingId(null);
+      setTab('live');
+    }
   }
 
   /**
    * เปิดเกมจากคลังกลับมา "แก้/จดต่อ" เป็นเกมปัจจุบัน
    * - เก็บเกมปัจจุบันเข้า History ก่อนเสมอ กันเกมที่กำลังทำอยู่หาย
-   *   (แม้ยังไม่มี event ก็เก็บ เพราะอาจเป็นเกมที่ตั้งรอไว้ — ผู้เล่น/ชื่อทีมมีค่า)
-   * - ดึงเกมที่เลือกออกจากคลัง แล้วตั้งเป็นเกมปัจจุบัน (แก้ต่อได้ที่แท็บ Live)
+   * - "ไม่" ลบเกมเป้าหมายออกจาก History — ทุกเกมอยู่ในคลังเสมอ
+   *   (เกม active จะปรากฏใน History ด้วย พร้อม badge "กำลังแก้")
+   *   การลบทำได้ที่ History และต้อง End game ก่อนเท่านั้น
    */
   function resumeSavedGame(id: string) {
     // resume เกมตัวเดิมที่ active อยู่แล้ว — แค่กลับไปแท็บ Live พอ
@@ -281,13 +302,12 @@ export default function App() {
     const target = savedGames.find((g) => g.id === id);
     if (!target) return;
 
-    // 1) เก็บเกมปัจจุบันเข้า History ก่อนเสมอ (archive ใช้ upsert ตาม id ไม่ซ้ำ)
-    archiveGame(game);
-    // 2) เอาเกมเป้าหมายออกจากคลัง (อ่าน storage ล่าสุดที่รวมเกม active แล้ว)
-    const list = deleteSavedGame(id);
+    // เก็บเกมปัจจุบันเข้า History ก่อนเสมอ (archive ใช้ upsert ตาม id ไม่ซ้ำ)
+    // ไม่ลบเกมเป้าหมายออก — ปล่อยให้ค้างใน History ต่อ
+    const list = archiveGame(game);
     setSavedGames(list);
 
-    // 3) ตั้งเกมเป้าหมายเป็นเกมปัจจุบัน แล้วไปแท็บ Live เพื่อจดต่อ
+    // ตั้งเกมเป้าหมายเป็นเกมปัจจุบัน แล้วไปแท็บ Live เพื่อจดต่อ
     setGame(target);
     saveGame(target);
     setViewingId(null);
@@ -387,7 +407,7 @@ export default function App() {
       {tab === 'review' && (
         <ReviewPage
           currentGame={game}
-          savedGames={savedGames}
+          savedGames={historyGames}
           onOpen={openSavedGame}
           onResume={resumeSavedGame}
           onDelete={removeSavedGame}
@@ -400,11 +420,6 @@ export default function App() {
           onClose={() => setNewGameOpen(false)}
         />
       )}
-
-      {/* เลข version แบบหลบๆ มุมล่างขวา ไว้ตรวจว่า deploy เวอร์ชันไหนแล้ว */}
-      <span className="app-version" aria-hidden="true">
-        v{__APP_VERSION__}
-      </span>
     </div>
   );
 }

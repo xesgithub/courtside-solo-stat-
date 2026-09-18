@@ -58,7 +58,10 @@ export function TopBar({
         <div className="brand__logo">◎</div>
         <div>
           <div className="brand__title">COURTSIDE</div>
-          <div className="brand__sub">The Solo Stat Desk</div>
+          <div className="brand__sub">
+            The Solo Stat Desk
+            <span className="brand__version">v{__APP_VERSION__}</span>
+          </div>
         </div>
       </button>
 
