@@ -3,7 +3,9 @@
   "private": true,
   "version": "0.3.1",
   "type": "module",
-  "description": "COURTSIDE — Solo Stat: แอปจดสถิติบาสเกตบอล Live สำหรับคนจดคนเดียว",
+  "description": "COURTSIDE — Solo Stat: แอปจดสถิติบาสเกตบอล Live สำหรับคนจดคนเดียว จัดการหลายแมตช์ต่อวันด้วยเวลาแข่ง, History, Box Score, แชร์รูป และสำรอง/ย้ายข้อมูลด้วย Export/Import JSON",
+  "license": "MIT",
+  "author": "Pakapong Reansakulyudee",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
