@@ -265,28 +265,29 @@ export default function App() {
 
   /**
    * เปิดเกมจากคลังกลับมา "แก้/จดต่อ" เป็นเกมปัจจุบัน
-   * - ถ้าเกมปัจจุบันมีข้อมูลอยู่ (จบแล้ว หรือมี event) จะเก็บเข้า History ก่อน กันข้อมูลหาย
+   * - เก็บเกมปัจจุบันเข้า History ก่อนเสมอ กันเกมที่กำลังทำอยู่หาย
+   *   (แม้ยังไม่มี event ก็เก็บ เพราะอาจเป็นเกมที่ตั้งรอไว้ — ผู้เล่น/ชื่อทีมมีค่า)
    * - ดึงเกมที่เลือกออกจากคลัง แล้วตั้งเป็นเกมปัจจุบัน (แก้ต่อได้ที่แท็บ Live)
-   * - เกมที่เลือกจะถูกย้ายออกจากคลังชั่วคราว (จะกลับเข้าคลังอีกครั้งเมื่อเริ่มเกมใหม่/resume เกมอื่น)
    */
   function resumeSavedGame(id: string) {
+    // resume เกมตัวเดิมที่ active อยู่แล้ว — แค่กลับไปแท็บ Live พอ
+    if (id === game.id) {
+      setViewingId(null);
+      setTab('live');
+      return;
+    }
+
     // หาเกมเป้าหมายในคลังก่อน — ถ้าไม่เจอก็ไม่ทำอะไร
     const target = savedGames.find((g) => g.id === id);
     if (!target) return;
 
-    // เก็บเกมปัจจุบันเข้า History ถ้ายังมีข้อมูลที่ควรเก็บ (กันข้อมูลหาย)
-    const worthKeeping =
-      game.finished || game.events.length > 0 || game.opponentEvents.length > 0;
-
-    // อัปเดตคลัง: archive เกมปัจจุบัน (ถ้าควรเก็บ) แล้วเอาเกมเป้าหมายออก
-    let list = savedGames;
-    if (worthKeeping && game.id !== id) {
-      list = archiveGame(game);
-    }
-    list = deleteSavedGame(id);
+    // 1) เก็บเกมปัจจุบันเข้า History ก่อนเสมอ (archive ใช้ upsert ตาม id ไม่ซ้ำ)
+    archiveGame(game);
+    // 2) เอาเกมเป้าหมายออกจากคลัง (อ่าน storage ล่าสุดที่รวมเกม active แล้ว)
+    const list = deleteSavedGame(id);
     setSavedGames(list);
 
-    // ตั้งเกมเป้าหมายเป็นเกมปัจจุบัน แล้วไปแท็บ Live เพื่อจดต่อ
+    // 3) ตั้งเกมเป้าหมายเป็นเกมปัจจุบัน แล้วไปแท็บ Live เพื่อจดต่อ
     setGame(target);
     saveGame(target);
     setViewingId(null);
