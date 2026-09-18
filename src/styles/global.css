@@ -9,8 +9,8 @@
   --text-dim: #8b93a7;
   --text-faint: #5b637a;
 
-  --team: #14b8a6; /* ทีมเรา (teal) */
-  --team-soft: rgba(20, 184, 166, 0.16);
+  --team: #ff7a1a; /* ทีมเรา (ส้ม) */
+  --team-soft: rgba(255, 122, 26, 0.14);
   --opp: #a78bfa; /* คู่แข่ง (ม่วง) */
   --opp-soft: rgba(167, 139, 250, 0.14);
 
@@ -236,7 +236,7 @@ button {
   background: var(--bg-elev-2);
 }
 .score-panel__score-box.team {
-  border-color: rgba(20, 184, 166, 0.5);
+  border-color: rgba(255, 122, 26, 0.5);
 }
 .score-panel__score-box.opp {
   border-color: rgba(167, 139, 250, 0.5);
@@ -1291,7 +1291,7 @@ button {
 .full-box tbody td.is-leader {
   position: relative;
   font-weight: 800;
-  color: #fbbf24;
+  color: #38bdf8;
 }
 .full-box tbody td.is-leader::after {
   content: '';
@@ -1302,14 +1302,14 @@ button {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background: #fbbf24;
+  background: #38bdf8;
 }
-/* PTS ที่เป็นผู้นำ: คง col-pts เป็นสีทีม แต่จุดใช้สี leader ให้สื่อว่าเป็นผู้นำ */
+/* PTS ที่เป็นผู้นำ: คง col-pts เป็นสีทีม (ส้ม) แต่จุดใช้สี leader ให้สื่อว่าเป็นผู้นำ */
 .full-box tbody td.col-pts.is-leader {
   color: var(--team);
 }
 .full-box tbody td.col-pts.is-leader::after {
-  background: #fbbf24;
+  background: #38bdf8;
 }
 
 /* ---------- iPad / responsive ---------- */

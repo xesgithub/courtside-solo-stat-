@@ -3,6 +3,12 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.7] - 2026-09-18
+
+### Changed
+- คืนสีธีมทีมเรากลับเป็น **ส้ม** (`#ff7a1a`) ตามเดิม
+- สีไฮไลต์ผู้นำในตาราง (คนทำ stat สูงสุด) เป็นสี **ฟ้า** (`#38bdf8`) ให้ตัดกับสีส้มชัด
+
 ## [0.3.6] - 2026-09-18
 
 ### Added
@@ -77,6 +83,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.7]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.7
 [0.3.6]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.6
 [0.3.5]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.5
 [0.3.4]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.4
