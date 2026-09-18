@@ -1304,13 +1304,6 @@ button {
   border-radius: 50%;
   background: #38bdf8;
 }
-/* PTS ที่เป็นผู้นำ: คง col-pts เป็นสีทีม (ส้ม) แต่จุดใช้สี leader ให้สื่อว่าเป็นผู้นำ */
-.full-box tbody td.col-pts.is-leader {
-  color: var(--team);
-}
-.full-box tbody td.col-pts.is-leader::after {
-  background: #38bdf8;
-}
 
 /* ---------- iPad / responsive ---------- */
 @media (max-width: 1024px) {

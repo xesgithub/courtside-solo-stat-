@@ -3,6 +3,11 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.10] - 2026-09-18
+
+### Changed
+- ไฮไลต์ผู้นำในตาราง: ค่า PTS สูงสุด (top score) เป็นสี **ฟ้า** เหมือน REB/AST สูงสุด ให้สม่ำเสมอทั้งตาราง (เดิม top score เป็นส้มแต่จุดฟ้า)
+
 ## [0.3.9] - 2026-09-18
 
 ### Fixed
@@ -93,6 +98,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.10]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.10
 [0.3.9]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.9
 [0.3.8]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.8
 [0.3.7]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.7
