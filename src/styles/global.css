@@ -1187,7 +1187,7 @@ button {
 .full-box table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 13px;
+  font-size: 12px;
 }
 .full-box thead th {
   position: sticky;
@@ -1197,7 +1197,7 @@ button {
 }
 .full-box th,
 .full-box td {
-  padding: 8px 8px;
+  padding: 6px 6px;
   text-align: center;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
@@ -1234,7 +1234,7 @@ button {
 .full-box td.col-pts {
   color: var(--team);
   font-weight: 800;
-  font-size: 14px;
+  font-size: 13px;
 }
 /* เปอร์เซ็นต์ใช้โทนเขียวจาง อ่านเป็นกลุ่มง่าย */
 .full-box td.pct {
@@ -1306,6 +1306,38 @@ button {
   }
   .player-grid {
     grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+/* จอ iPad / แคบ: ย่อ Box Score ไม่ให้ตารางล้นจอ */
+@media (max-width: 1024px) {
+  .full-box table {
+    font-size: 11px;
+  }
+  .full-box th,
+  .full-box td {
+    padding: 5px 4px;
+  }
+  .full-box td.col-pts {
+    font-size: 12px;
+  }
+  .box-summary__score {
+    font-size: 36px;
+  }
+  .box-summary__name {
+    font-size: 15px;
+  }
+}
+@media (max-width: 768px) {
+  .full-box table {
+    font-size: 10px;
+  }
+  .full-box th,
+  .full-box td {
+    padding: 4px 3px;
+  }
+  .box-summary__score {
+    font-size: 30px;
   }
 }
 

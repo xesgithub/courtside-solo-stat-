@@ -29,14 +29,14 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
     try {
       const base = `Courtside_${game.teamName}_vs_${game.opponentName}_${game.date}`;
       const result = await shareBoxScore(captureRef.current, base);
-      if (result === 'unsupported') {
+      if (result === 'downloaded') {
         window.alert(
-          'This device cannot share directly. Please open the app on an iPad or phone.',
+          'บันทึกรูป Box Score ลงเครื่องแล้ว — เปิดรูปจากอัลบั้ม/ดาวน์โหลด แล้วส่งเข้า LINE ได้เลย\n(อุปกรณ์นี้แชร์เข้าแอปอื่นโดยตรงไม่ได้)',
         );
       }
     } catch (err) {
       console.error('share failed', err);
-      window.alert('Sorry, could not create the image. Please try again.');
+      window.alert('ขออภัย สร้างรูปไม่สำเร็จ กรุณาลองใหม่');
     } finally {
       setSharing(false);
     }

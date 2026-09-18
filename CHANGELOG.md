@@ -3,6 +3,14 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.4] - 2026-09-18
+
+### Fixed
+- แชร์รูป Box Score เข้า LINE: ถ้าอุปกรณ์/เบราว์เซอร์แชร์ไฟล์โดยตรงไม่ได้ (หรือ share ล้มเหลว) จะ **ดาวน์โหลดรูปให้แทน** เพื่อให้เซฟแล้วส่งเข้า LINE เองได้ (เดิมขึ้นข้อความว่าแชร์ไม่ได้เฉยๆ)
+
+### Changed
+- ย่อขนาดตัวอักษรตาราง Box Score และ score ให้พอดีจอ iPad/มือถือ (responsive) ไม่ล้นจอ
+
 ## [0.3.3] - 2026-09-18
 
 ### Added
@@ -52,6 +60,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.4]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.4
 [0.3.3]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.3
 [0.3.2]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.2
 [0.3.1]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.1
