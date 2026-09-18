@@ -66,7 +66,7 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
     return (
       <tr className={extraClass}>
         <td className="name">{label}</td>
-        <td>{line.pts}</td>
+        <td className="col-pts">{line.pts}</td>
         <td>
           {line.fg2m + line.fg3m}/{line.fg2a + line.fg3a}
         </td>
@@ -80,7 +80,7 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
         <td>{line.stl}</td>
         <td>{line.blk}</td>
         <td>{line.to}</td>
-        <td>{line.pf}</td>
+        <td className="col-pf">{line.pf}</td>
       </tr>
     );
   }
@@ -180,7 +180,7 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                     <td className="name">
                       #{p?.number} {p?.name}
                     </td>
-                    <td>{line.pts}</td>
+                    <td className="col-pts">{line.pts}</td>
                     <td>
                       {line.fg2m + line.fg3m}/{line.fg2a + line.fg3a}
                     </td>
@@ -196,11 +196,11 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                     <td>{line.stl}</td>
                     <td>{line.blk}</td>
                     <td>{line.to}</td>
-                    <td>{line.pf}</td>
+                    <td className="col-pf">{line.pf}</td>
                   </tr>
                 );
               })}
-              {showTeamRow && renderRow(box.teamLine, 'Team (no player)')}
+              {showTeamRow && renderRow(box.teamLine, 'Team (no player)', 'team-row')}
               {renderRow(box.totals, 'Total', 'totals')}
             </tbody>
           </table>

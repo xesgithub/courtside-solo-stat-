@@ -3,6 +3,11 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.3.2] - 2026-09-18
+
+### Changed
+- ปรับดีไซน์ตาราง Box Score ให้อ่านง่ายขึ้น — แถวสลับสี + hover, เน้น PTS ด้วยสีทีม, FG%/3P% สีเขียว, PF สีแดง, หัวตารางและแถวรวมทีมเด่นขึ้น
+
 ## [0.3.1] - 2026-09-18
 
 ### Added
@@ -42,6 +47,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.3.2]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.2
 [0.3.1]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.1
 [0.3.0]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.0
 [0.2.0]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.2.0

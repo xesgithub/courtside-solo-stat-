@@ -1192,32 +1192,78 @@ button {
 .full-box thead th {
   position: sticky;
   top: 0;
-  background: var(--bg-elev);
+  background: var(--bg-elev-3);
   z-index: 1;
 }
 .full-box th,
 .full-box td {
-  padding: 5px 6px;
+  padding: 8px 8px;
   text-align: center;
   font-variant-numeric: tabular-nums;
   white-space: nowrap;
 }
 .full-box th {
-  color: var(--text-faint);
-  font-weight: 600;
-  border-bottom: 1px solid var(--border);
+  color: var(--text-dim);
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  border-bottom: 2px solid var(--border);
 }
 .full-box td.name,
 .full-box th.name {
   text-align: left;
 }
+/* แถวผู้เล่น: สลับสี (zebra) + hover เน้น */
+.full-box tbody tr {
+  border-bottom: 1px solid var(--border-soft);
+  transition: background 0.1s;
+}
+.full-box tbody tr:nth-child(even) {
+  background: rgba(255, 255, 255, 0.02);
+}
+.full-box tbody tr:hover {
+  background: var(--team-soft);
+}
+/* ชื่อผู้เล่นเด่นขึ้น */
+.full-box td.name {
+  font-weight: 600;
+  color: var(--text);
+}
+/* PTS เด่นด้วยสีทีม (ส้ม) ตัวหนา */
+.full-box td.col-pts {
+  color: var(--team);
+  font-weight: 800;
+  font-size: 14px;
+}
+/* เปอร์เซ็นต์ใช้โทนเขียวจาง อ่านเป็นกลุ่มง่าย */
 .full-box td.pct {
-  color: var(--text-dim);
+  color: var(--make);
+  font-size: 12px;
+}
+/* PF โทนแดงจาง สื่อความหมายฟาวล์ */
+.full-box td.col-pf {
+  color: var(--foul);
+}
+/* แถวรวมทีม: เด่นด้วยพื้นเข้ม + เส้นบนสีทีม */
+.full-box tr.totals {
+  background: var(--bg-elev-3) !important;
 }
 .full-box tr.totals td {
-  border-top: 1px solid var(--border);
-  font-weight: 700;
+  border-top: 2px solid var(--team);
+  border-bottom: none;
+  font-weight: 800;
   color: var(--text);
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+.full-box tr.totals td.col-pts {
+  color: var(--team);
+}
+/* แถว Team (no player) โทนกลางจางๆ */
+.full-box tr.team-row td {
+  color: var(--text-dim);
+  font-style: italic;
 }
 
 /* ---------- iPad / responsive ---------- */
