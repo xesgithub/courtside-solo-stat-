@@ -19,6 +19,8 @@ interface Props {
   onExport: () => void;
   /** Import เกมจากไฟล์ JSON */
   onImport: (file: File) => void;
+  /** Import เกมจากไฟล์ CSV (สถิติจากโปรแกรมอื่น) พร้อมวัน-เวลาแข่ง */
+  onImportCsv: (file: File, scheduledAt: number) => void;
 }
 
 function scoreOf(game: Game): { team: number; opp: number } {
@@ -34,8 +36,10 @@ export function ReviewPage({
   onDelete,
   onExport,
   onImport,
+  onImportCsv,
 }: Props) {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
 
   // จัดกลุ่ม: ยังไม่ End (ongoing) อยู่บน, End แล้ว (finished) อยู่ล่าง
   const groups = useMemo(
@@ -157,6 +161,39 @@ export function ReviewPage({
                 const file = e.target.files?.[0];
                 if (file) onImport(file);
                 // เคลียร์ค่า เพื่อให้เลือกไฟล์เดิมซ้ำได้
+                e.target.value = '';
+              }}
+            />
+            <button
+              className="btn btn--ghost history-actions__btn"
+              onClick={() => csvInputRef.current?.click()}
+              title="นำเข้าไฟล์ CSV สถิติจากโปรแกรมอื่น (เข้า History เป็นเกมที่จบแล้ว)"
+            >
+              ⬆ CSV
+            </button>
+            <input
+              ref={csvInputRef}
+              type="file"
+              accept="text/csv,.csv"
+              style={{ display: 'none' }}
+              onChange={(e) => {
+                const file = e.target.files?.[0];
+                if (file) {
+                  // ถามวัน-เวลาแข่ง (default = ตอนนี้) รูปแบบ YYYY-MM-DD HH:mm
+                  const def = new Date();
+                  const pad = (n: number) => String(n).padStart(2, '0');
+                  const defStr =
+                    `${def.getFullYear()}-${pad(def.getMonth() + 1)}-${pad(def.getDate())} ` +
+                    `${pad(def.getHours())}:${pad(def.getMinutes())}`;
+                  const input = window.prompt(
+                    'วัน-เวลาแข่งของไฟล์นี้ (YYYY-MM-DD HH:mm)',
+                    defStr,
+                  );
+                  if (input !== null) {
+                    const ms = new Date(input.replace(' ', 'T')).getTime();
+                    onImportCsv(file, Number.isNaN(ms) ? Date.now() : ms);
+                  }
+                }
                 e.target.value = '';
               }}
             />

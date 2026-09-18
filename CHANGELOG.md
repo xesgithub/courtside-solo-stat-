@@ -3,6 +3,11 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.4.0] - 2026-09-19
+
+### Added
+- **Import CSV** — นำเข้าไฟล์ CSV สถิติจากโปรแกรมอื่นเข้า History เป็นเกมที่จบแล้ว (ปุ่ม CSV ในหน้า History) เลือกไฟล์แล้วระบุวัน-เวลาแข่ง; ทีมแรกในไฟล์ = ทีมเรา (สถิติรายคนครบ), ทีมสอง = คู่แข่ง (เก็บแค่คะแนนรวม) รองรับ score correction และคำนวณคะแนนคู่แข่งให้ตรง scoreboard
+
 ## [0.3.10] - 2026-09-18
 
 ### Changed
@@ -98,6 +103,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.4.0]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.4.0
 [0.3.10]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.10
 [0.3.9]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.9
 [0.3.8]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.8

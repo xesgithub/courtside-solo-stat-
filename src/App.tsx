@@ -15,6 +15,7 @@ import {
   replaceSavedGames,
 } from './lib/storage';
 import { buildBackup, parseBackup, mergeGames } from './lib/backup';
+import { importGameFromCsv } from './lib/csvImport';
 import type { Game, Player, StatEvent } from './types';
 
 export default function App() {
@@ -319,10 +320,40 @@ export default function App() {
   }
 
   /**
+   * Import ไฟล์ CSV สถิติ (จากโปรแกรมอื่น) เข้า History เป็นเกมที่จบแล้ว
+   * ทีมแรกในไฟล์ = ทีมเรา, ทีมสอง = คู่แข่ง (เก็บแค่คะแนนรวม)
+   * @param file  ไฟล์ CSV
+   * @param scheduledAt  วัน-เวลาแข่งที่จะบันทึกใน History
+   */
+  function importCsv(file: File, scheduledAt: number) {
+    const reader = new FileReader();
+    reader.onload = () => {
+      try {
+        const imported = importGameFromCsv(String(reader.result ?? ''), scheduledAt);
+        // เก็บเกม active ปัจจุบันเข้าคลังก่อน กันตกหล่น แล้วเพิ่มเกมที่ import
+        archiveGame(game);
+        const list = archiveGame(imported);
+        setSavedGames(list);
+        setTab('review');
+        window.alert(
+          `นำเข้าเกมสำเร็จ: ${imported.teamName} vs ${imported.opponentName} ` +
+            `(${imported.players.length} ผู้เล่น) เพิ่มใน History แล้ว`,
+        );
+      } catch (err) {
+        window.alert(
+          'นำเข้า CSV ไม่สำเร็จ: ' +
+            (err instanceof Error ? err.message : 'ไฟล์ไม่ถูกต้อง'),
+        );
+      }
+    };
+    reader.onerror = () => window.alert('อ่านไฟล์ไม่สำเร็จ');
+    reader.readAsText(file);
+  }
+
+  /**
    * ลบเกมออกจากคลัง (History)
    * - ปกติ: ลบออกจาก savedGames
-   * - ถ้าเป็นเกมที่ active อยู่ (โชว์ใน History ด้วย): แทนที่เกม active ด้วยเกมใหม่
-   *   เพื่อไม่ให้มันถูก auto-save กลับเข้ามาใหม่ (ปุ่มลบเปิดเฉพาะเกม finished อยู่แล้ว)
+   * - ถ้าเป็นเกมที่ active อยู่: แทนที่ด้วยเกมใหม่ กันมันถูก auto-save กลับเข้ามา
    */
   function removeSavedGame(id: string) {
     const list = deleteSavedGame(id);
@@ -469,6 +500,7 @@ export default function App() {
           onDelete={removeSavedGame}
           onExport={exportBackup}
           onImport={importBackup}
+          onImportCsv={importCsv}
         />
       )}
 
