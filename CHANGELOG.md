@@ -3,6 +3,23 @@
 บันทึกการเปลี่ยนแปลงที่สำคัญของ COURTSIDE — Solo Stat
 รูปแบบอิงตาม [Keep a Changelog](https://keepachangelog.com/) และใช้ [Semantic Versioning](https://semver.org/)
 
+## [0.5.0] - 2026-09-24
+
+### Added
+- **ปักหมุดผู้เล่น (Pin)** — แตะดาวมุมการ์ดเพื่อดันผู้เล่นคนสำคัญขึ้นบนสุด + ทำให้การ์ดเด่นขึ้น (แถบเหลืองทองด้านซ้าย) เข้าถึงเร็วสำหรับคนที่กดบ่อยในเกมจริง
+- **ปุ่ม Undo** บนกระดานคะแนน — ย้อน event ล่าสุดได้ทันที (เดิมต้องเปิด modal ลบทีละอัน)
+
+### Changed
+- **ยกเครื่อง UI หน้า Live** ให้จดคนเดียวได้เร็วขึ้น:
+  - ย้าย Event Log ไปเป็นแถบ pill ในกระดานคะแนน (ชื่อผู้เล่นขึ้นก่อน, อันล่าสุดเด่น, แสดง 2 รายการล่าสุด) พร้อมปุ่มเปิดดู event ทั้งหมด
+  - จัดปุ่มสถิติเป็น 3 ระดับ: **2PT/3PT** ใหญ่สุด, **REB/AST/STL/BLK** ขนาดกลาง, **TO/PF/FT** เป็นแถบข้างชื่อผู้เล่น
+  - ใส่สีแยกแต่ละสถิติ (REB ฟ้า, AST เหลือง, STL เขียวมิ้นต์, BLK ม่วง, TO ส้ม, Foul แดง, FT เขียว) เพื่ออ่าน/กดเร็วขึ้น
+  - การ์ดผู้เล่นเหลือแค่ **เบอร์ + ชื่อ** (ตัวใหญ่ขึ้น กดง่าย, ชื่อยาวขึ้นได้ 2 บรรทัด) และยืดเต็มความสูง รองรับทีม 8–15 คนโดยไม่ต้องเลื่อน
+  - แยกสีสถานะ: ปักหมุด = เหลืองทอง, กำลังเลือก = ส้ม; สัดส่วนหน้า Live เป็น 50:50
+
+### Removed
+- คอมโพเนนต์ที่ไม่ใช้แล้ว (EventLog, PromptModal) และปุ่มสลับโหมดสถิติบนการ์ด (PTS/REB/AST) — ดูสถิติเต็มได้ที่หน้า Box Score
+
 ## [0.4.0] - 2026-09-19
 
 ### Added
@@ -103,6 +120,7 @@
 - **History** เก็บเกมเก่า
 - CI: deploy อัตโนมัติขึ้น GitHub Pages (Node 22)
 
+[0.5.0]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.5.0
 [0.4.0]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.4.0
 [0.3.10]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.10
 [0.3.9]: https://github.com/xesgithub/courtside-solo-stat-/releases/tag/v0.3.9
