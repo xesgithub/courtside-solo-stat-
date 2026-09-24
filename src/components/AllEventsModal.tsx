@@ -1,7 +1,13 @@
 import { STAT_LABEL } from '../lib/actions';
 import { formatClock, formatPeriod } from '../lib/format';
-import type { Game } from '../types';
-import { eventWho } from './EventLog';
+import type { Game, StatEvent } from '../types';
+
+/** ชื่อผู้เล่น/ทีมของ event 1 รายการ */
+export function eventWho(game: Game, ev: StatEvent): string {
+  if (ev.isTeam || !ev.playerId) return 'Team';
+  const p = game.players.find((pl) => pl.id === ev.playerId);
+  return p ? `#${p.number} ${p.name}` : 'Unknown';
+}
 
 interface Props {
   game: Game;

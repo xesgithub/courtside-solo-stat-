@@ -34,15 +34,15 @@ export const DUMMY_NEW_GAME: NewGameConfig = {
   quarters: 4,
   players: [
     { number: '9', name: 'Jay', isStarter: true },
-    { number: '12', name: 'Om', isStarter: true },
-    { number: '15', name: 'Mac', isStarter: true },
-    { number: '4', name: 'Lead', isStarter: true },
-    { number: '7', name: 'Tor', isStarter: true },
+    { number: '12', name: 'Om' },
+    { number: '15', name: 'Mac' },
+    { number: '4', name: 'Lead' },
+    { number: '7', name: 'Tor' },
     { number: '23', name: 'Boss' },
     { number: '8', name: 'Nut' },
     { number: '3', name: 'Em' },
     { number: '11', name: 'Gun' },
-    { number: '21', name: 'Pun' },
+    { number: '21', name: 'Pun', isStarter: true },
   ],
 };
 

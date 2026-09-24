@@ -21,7 +21,7 @@ export interface Player {
   id: string;
   number: string; // หมายเลขเสื้อ (เก็บเป็น string เพื่อคงรูปแบบ เช่น "07")
   name: string;
-  isStarter?: boolean; // ทำเครื่องหมายตัวจริงไว้ (ไม่ใช้คำนวณ)
+  isStarter?: boolean; // ปักหมุด (pin) ผู้เล่นเด่น -> ดันขึ้นบน + การ์ดเด่นขึ้น (ไม่ใช้คำนวณ)
 }
 
 /**

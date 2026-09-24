@@ -1,16 +1,13 @@
 import { useRef, useState } from 'react';
 import type { Player } from '../types';
-import type { PlayerLine } from '../lib/stats';
-
-export type StatMode = 'pts' | 'full';
 
 interface Props {
   players: Player[];
-  linesById: Map<string, PlayerLine>;
-  statMode: StatMode;
   selectedId: string | null;
   onSelect: (id: string) => void;
   onReorder: (fromId: string, toId: string) => void;
+  /** ปักหมุด/ถอนหมุด (ไม่ส่ง = ล็อกอยู่ pin ไม่ได้) */
+  onTogglePin?: (id: string) => void;
 }
 
 // ต้องขยับเกินระยะนี้ถึงนับว่าเป็น "ลาก" ไม่งั้นถือเป็น "แตะเลือก"
@@ -18,11 +15,10 @@ const DRAG_THRESHOLD = 10;
 
 export function PlayerList({
   players,
-  linesById,
-  statMode,
   selectedId,
   onSelect,
   onReorder,
+  onTogglePin,
 }: Props) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -109,7 +105,6 @@ export function PlayerList({
       onPointerCancel={endDrag}
     >
       {players.map((p) => {
-        const line = linesById.get(p.id);
         return (
           <div
             key={p.id}
@@ -119,6 +114,7 @@ export function PlayerList({
             className={
               'player-card' +
               (selectedId === p.id ? ' selected' : '') +
+              (p.isStarter ? ' pinned' : '') +
               (overId === p.id && dragId !== p.id ? ' drop-target' : '') +
               (dragId === p.id ? ' dragging' : '')
             }
@@ -133,27 +129,27 @@ export function PlayerList({
             <span className="player-card__grip" aria-hidden>
               ⠿
             </span>
-            {p.isStarter && <span className="player-card__star">★</span>}
+            {onTogglePin && (
+              <button
+                className={
+                  'player-card__star' + (p.isStarter ? ' player-card__star--on' : '')
+                }
+                onPointerDown={(e) => e.stopPropagation()}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onTogglePin(p.id);
+                }}
+                aria-label={p.isStarter ? 'Unpin player' : 'Pin player'}
+                title={p.isStarter ? 'เอาหมุดออก' : 'ปักหมุด (ดันขึ้นบน)'}
+              >
+                {p.isStarter ? '★' : '☆'}
+              </button>
+            )}
+            {!onTogglePin && p.isStarter && (
+              <span className="player-card__star player-card__star--on">★</span>
+            )}
             <span className="player-card__num">{p.number}</span>
             <span className="player-card__name">{p.name}</span>
-
-            {statMode === 'pts' ? (
-              <span className="player-card__pts">
-                <b>{line?.pts ?? 0}</b> PTS
-              </span>
-            ) : (
-              <span className="player-card__stats">
-                <span>
-                  <b>{line?.pts ?? 0}</b> PTS
-                </span>
-                <span>
-                  <b>{line?.reb ?? 0}</b> REB
-                </span>
-                <span>
-                  <b>{line?.ast ?? 0}</b> AST
-                </span>
-              </span>
-            )}
           </div>
         );
       })}

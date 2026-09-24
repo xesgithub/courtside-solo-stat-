@@ -121,6 +121,18 @@ export default function App() {
     }));
   }
 
+  /** Undo: ลบ event ล่าสุดออก 1 รายการ */
+  function undoLastEvent() {
+    setGame((g) => {
+      if (g.events.length === 0) return g;
+      return {
+        ...g,
+        events: g.events.slice(0, -1),
+        updatedAt: Date.now(),
+      };
+    });
+  }
+
   function opponentDelta(delta: number) {
     setGame((g) => ({
       ...g,
@@ -172,6 +184,18 @@ export default function App() {
     setGame((g) => ({
       ...g,
       players: g.players.map((p) => (p.id === id ? { ...p, ...patch } : p)),
+      updatedAt: Date.now(),
+    }));
+  }
+
+  /** ปักหมุด/ถอนหมุดผู้เล่น (pin เด่น -> ดันขึ้นบน) */
+  function togglePin(id: string) {
+    if (game.finished) return;
+    setGame((g) => ({
+      ...g,
+      players: g.players.map((p) =>
+        p.id === id ? { ...p, isStarter: !p.isStarter } : p
+      ),
       updatedAt: Date.now(),
     }));
   }
@@ -478,9 +502,11 @@ export default function App() {
           onReorderPlayers={reorderPlayers}
           onUpdateTeamInfo={updateTeamInfo}
           onUpdatePlayer={updatePlayer}
+          onTogglePin={togglePin}
           onAddPlayer={addPlayer}
           onRemovePlayer={removePlayer}
           onDeleteEvent={deleteEvent}
+          onUndo={undoLastEvent}
         />
       )}
       {tab === 'box' && (

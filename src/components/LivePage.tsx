@@ -1,19 +1,10 @@
 import { useMemo, useState } from 'react';
 import type { Game, Player, StatEvent } from '../types';
 import type { ActionDef } from '../lib/actions';
-import { computeBoxScore, type PlayerLine } from '../lib/stats';
-import { PlayerList, type StatMode } from './PlayerList';
-import { ActionPad } from './ActionPad';
+import { PlayerList } from './PlayerList';
+import { ActionPad, type PickPrompt } from './ActionPad';
 import { ScorePanel } from './ScorePanel';
-import { EventLog } from './EventLog';
-import { PromptModal, type PromptMode } from './PromptModal';
 import { TeamEditModal } from './TeamEditModal';
-
-interface PendingPrompt {
-  mode: PromptMode;
-  /** คนที่เพิ่งยิง — ห้ามเลือกเป็นคนแอสซิสต์/รีบาวด์ตัวเอง */
-  shooterId: string;
-}
 
 interface Props {
   game: Game;
@@ -29,9 +20,11 @@ interface Props {
     scheduledAt?: number;
   }) => void;
   onUpdatePlayer: (id: string, patch: Partial<Pick<Player, 'name' | 'number'>>) => void;
+  onTogglePin: (id: string) => void;
   onAddPlayer: (name: string, number: string) => void;
   onRemovePlayer: (id: string) => void;
   onDeleteEvent: (id: string) => void;
+  onUndo: () => void;
 }
 
 export function LivePage({
@@ -44,47 +37,54 @@ export function LivePage({
   onReorderPlayers,
   onUpdateTeamInfo,
   onUpdatePlayer,
+  onTogglePin,
   onAddPlayer,
   onRemovePlayer,
   onDeleteEvent,
+  onUndo,
 }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [prompt, setPrompt] = useState<PendingPrompt | null>(null);
-  const [statMode, setStatMode] = useState<StatMode>('pts');
+  const [prompt, setPrompt] = useState<PickPrompt | null>(null);
   const [editing, setEditing] = useState(false);
 
   const finished = !!game.finished;
 
   const selectedPlayer = game.players.find((p) => p.id === selectedId) ?? null;
 
-  const linesById = useMemo(() => {
-    const box = computeBoxScore(game.players, game.events);
-    const m = new Map<string, PlayerLine>();
-    box.lines.forEach((l) => m.set(l.playerId, l));
-    return m;
-  }, [game.players, game.events]);
+  // ผู้เล่นที่ปักหมุด (pin) ดันขึ้นบนสุด — คงลำดับเดิมภายในกลุ่ม (stable)
+  const orderedPlayers = useMemo(() => {
+    const pinned = game.players.filter((p) => p.isStarter);
+    const rest = game.players.filter((p) => !p.isStarter);
+    return [...pinned, ...rest];
+  }, [game.players]);
 
   function handleAction(action: ActionDef) {
     if (finished) return;
     if (!selectedPlayer) return;
     onPushEvent({ kind: action.kind, playerId: selectedPlayer.id });
+    // ยิงลง/พลาด → เปิดแผงเลือกคน assist/rebound ฝั่งขวา (ไม่บังคับ)
     if (action.asksAssist)
       setPrompt({ mode: 'assist', shooterId: selectedPlayer.id });
     else if (action.asksRebound)
       setPrompt({ mode: 'rebound', shooterId: selectedPlayer.id });
+    else setPrompt(null);
   }
 
-  function resolvePrompt(kind: 'AST' | 'REB', target: string | 'team' | 'skip') {
-    if (target === 'skip') {
-      setPrompt(null);
-      return;
-    }
+  function resolvePrompt(target: string | 'team') {
+    if (!prompt) return;
+    const kind = prompt.mode === 'assist' ? 'AST' : 'REB';
     if (target === 'team') {
       onPushEvent({ kind, isTeam: true });
     } else {
       onPushEvent({ kind, playerId: target });
     }
     setPrompt(null);
+  }
+
+  // เลือกคนฝั่งซ้าย = ยกเลิกโหมดถาม แล้วเตรียม action ให้คนใหม่ (ไม่บังคับตอบ assist/rebound)
+  function handleSelectPlayer(id: string) {
+    setPrompt(null);
+    setSelectedId(id === selectedId ? null : id);
   }
 
   return (
@@ -108,32 +108,13 @@ export function LivePage({
                 ✎ Edit team
               </button>
             </div>
-            <div className="statmode-toggle">
-              <button
-                className={
-                  'statmode-btn' + (statMode === 'pts' ? ' statmode-btn--active' : '')
-                }
-                onClick={() => setStatMode('pts')}
-              >
-                PTS
-              </button>
-              <button
-                className={
-                  'statmode-btn' + (statMode === 'full' ? ' statmode-btn--active' : '')
-                }
-                onClick={() => setStatMode('full')}
-              >
-                PTS·REB·AST
-              </button>
-            </div>
           </div>
           <PlayerList
-            players={game.players}
-            linesById={linesById}
-            statMode={statMode}
+            players={orderedPlayers}
             selectedId={selectedId}
-            onSelect={(id) => setSelectedId(id === selectedId ? null : id)}
+            onSelect={handleSelectPlayer}
             onReorder={onReorderPlayers}
+            onTogglePin={finished ? undefined : onTogglePin}
           />
         </section>
 
@@ -146,14 +127,9 @@ export function LivePage({
               opponentScore={opponentScore}
               onTeamDelta={finished ? () => {} : onTeamDelta}
               onOpponentDelta={finished ? () => {} : onOpponentDelta}
-            />
-          </section>
-
-          <section className="panel live__events">
-            <EventLog
               game={game}
-              limit={3}
-              onDelete={finished ? undefined : onDeleteEvent}
+              onUndo={finished ? undefined : onUndo}
+              onDeleteEvent={finished ? undefined : onDeleteEvent}
             />
           </section>
 
@@ -173,28 +149,16 @@ export function LivePage({
                 player={selectedPlayer}
                 onAction={handleAction}
                 onClose={() => setSelectedId(null)}
+                prompt={prompt}
+                players={game.players}
+                onPickPerson={(pid) => resolvePrompt(pid)}
+                onPickTeam={() => resolvePrompt('team')}
+                onSkipPrompt={() => setPrompt(null)}
               />
             )}
           </section>
         </div>
       </div>
-
-      {prompt && (
-        <PromptModal
-          mode={prompt.mode}
-          players={game.players}
-          excludeId={prompt.shooterId}
-          onPick={(pid) =>
-            resolvePrompt(prompt.mode === 'assist' ? 'AST' : 'REB', pid)
-          }
-          onTeam={() =>
-            resolvePrompt(prompt.mode === 'assist' ? 'AST' : 'REB', 'team')
-          }
-          onSkip={() =>
-            resolvePrompt(prompt.mode === 'assist' ? 'AST' : 'REB', 'skip')
-          }
-        />
-      )}
 
       {editing && (
         <TeamEditModal
