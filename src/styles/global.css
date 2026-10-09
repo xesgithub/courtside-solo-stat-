@@ -2219,6 +2219,20 @@ button {
   100% { box-shadow: 0 0 0 0 rgba(52, 211, 153, 0); }
 }
 
+/* flash overlay ยืนยันบันทึก — วางทับการ์ด เล่นทุกครั้งที่ commit (key=nonce) */
+.player-card__flash {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  animation: flash-ok-overlay 0.45s ease-out;
+}
+@keyframes flash-ok-overlay {
+  0%   { box-shadow: inset 0 0 0 3px var(--make), 0 0 0 0 rgba(52, 211, 153, 0.9); background: var(--make-soft); }
+  60%  { box-shadow: inset 0 0 0 3px rgba(52, 211, 153, 0.4), 0 0 0 8px rgba(52, 211, 153, 0); background: rgba(52, 211, 153, 0.1); }
+  100% { box-shadow: inset 0 0 0 0 rgba(52, 211, 153, 0), 0 0 0 0 rgba(52, 211, 153, 0); background: transparent; }
+}
+
 /* ---- ปุ่ม START กะพริบเตือนเมื่อจดสถิติแล้วแต่ยังไม่เดินนาฬิกา ---- */
 .clk-btn--primary.clk-btn--remind {
   animation: remind-blink 0.9s ease-in-out infinite;

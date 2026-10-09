@@ -10,6 +10,8 @@ interface Props {
   onTogglePin?: (id: string) => void;
   /** id ผู้เล่นที่เพิ่งบันทึก event — flash สั้นๆ ยืนยัน */
   flashId?: string | null;
+  /** bump ทุกครั้งที่ flash — ใช้เป็น key re-trigger animation (flash คนเดิมซ้ำได้) */
+  flashNonce?: number;
   /** true = มี action ค้างรออยู่ รอผู้ใช้แตะคน (ทำให้การ์ดดูเชิญชวนให้แตะ) */
   awaitingPick?: boolean;
   /** เวลา auto-cancel การเลือกคน (ms) — ใช้วาดแถบนับถอยหลังบนการ์ดที่เลือก */
@@ -28,6 +30,7 @@ export function PlayerList({
   onReorder,
   onTogglePin,
   flashId,
+  flashNonce,
   awaitingPick,
   selectTimeoutMs = 6000,
   selectNonce = 0,
@@ -128,8 +131,7 @@ export function PlayerList({
               (selectedId === p.id ? ' selected' : '') +
               (p.isStarter ? ' pinned' : '') +
               (overId === p.id && dragId !== p.id ? ' drop-target' : '') +
-              (dragId === p.id ? ' dragging' : '') +
-              (flashId === p.id ? ' flash-ok' : '')
+              (dragId === p.id ? ' dragging' : '')
             }
             onPointerDown={(e) => onPointerDown(e, p.id)}
             onKeyDown={(e) => {
@@ -171,6 +173,11 @@ export function PlayerList({
                 style={{ animationDuration: `${selectTimeoutMs}ms` }}
                 aria-hidden
               />
+            )}
+            {/* flash ยืนยันบันทึก — key=flashNonce ทำให้ animation เล่นใหม่ทุกครั้ง
+                (แม้ flash คนเดิมติดๆ กัน) */}
+            {flashId === p.id && (
+              <span key={flashNonce} className="player-card__flash" aria-hidden />
             )}
           </div>
         );

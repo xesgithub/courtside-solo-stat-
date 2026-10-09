@@ -48,6 +48,8 @@ export function LivePage({
   const [editing, setEditing] = useState(false);
   // id ของ event ที่เพิ่งบันทึก (ไว้ flash ยืนยันบนการ์ด/ปุ่ม)
   const [flashPlayerId, setFlashPlayerId] = useState<string | null>(null);
+  // bump ทุกครั้งที่ flash เพื่อ re-trigger animation (flash คนเดิมซ้ำได้)
+  const [flashNonce, setFlashNonce] = useState(0);
   // เมื่อ action ที่ต้องเลือกแต้ม (ฟาวล์ได้/เสีย) ครบคู่กับผู้เล่นแล้ว -> เปิดถาม 1/2/3
   const [pointsPrompt, setPointsPrompt] = useState<{
     action: ActionDef;
@@ -80,9 +82,11 @@ export function LivePage({
     return [...pinned, ...rest];
   }, [game.players]);
 
-  /** flash สั้นๆ ยืนยันว่าบันทึก event ให้ผู้เล่นคนนี้แล้ว */
+  /** flash สั้นๆ ยืนยันว่าบันทึก event ให้ผู้เล่นคนนี้แล้ว
+   *  ใช้ bump nonce เพื่อให้ animation เล่นซ้ำได้แม้ flash คนเดิมติดๆ กัน */
   function triggerFlash(playerId: string) {
     setFlashPlayerId(playerId);
+    setFlashNonce((n) => n + 1);
     window.setTimeout(() => {
       setFlashPlayerId((cur) => (cur === playerId ? null : cur));
     }, 450);
@@ -181,6 +185,7 @@ export function LivePage({
             onReorder={onReorderPlayers}
             onTogglePin={finished ? undefined : onTogglePin}
             flashId={flashPlayerId}
+            flashNonce={flashNonce}
             awaitingPick={!!pendingAction}
             selectTimeoutMs={SELECT_TIMEOUT_MS}
             selectNonce={selectNonce}
