@@ -8,6 +8,10 @@ interface Props {
   onClose: () => void;
   /** action ที่กดค้างไว้ก่อน (ยังไม่ได้เลือกคน) — ใช้ไฮไลต์ปุ่มที่ค้างอยู่ */
   pendingAction: ActionDef | null;
+  /** kind ของปุ่มที่เพิ่งกดบันทึก — ให้ปุ่มนั้นกระพริบวาบ */
+  flashActionKind?: string | null;
+  /** bump ทุกครั้งที่กด — ใช้เป็น key re-trigger animation (กดปุ่มเดิมซ้ำได้) */
+  flashActionNonce?: number;
 }
 
 const primaryActions = ACTIONS.filter((a) => a.group === 'primary');
@@ -16,12 +20,27 @@ const foulActions = ACTIONS.filter((a) => a.group === 'foul');
 const ftActions = ACTIONS.filter((a) => a.group === 'ft');
 const quickActions = ACTIONS.filter((a) => a.group === 'quick');
 
-export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
+export function ActionPad({
+  player,
+  onAction,
+  onClose,
+  pendingAction,
+  flashActionKind,
+  flashActionNonce = 0,
+}: Props) {
   // ปุ่มกดได้เสมอ แม้ยังไม่เลือกคน (เลือก action ก่อนแล้วค่อยเลือกคนได้)
   const isPending = (a: ActionDef) => pendingAction?.kind === a.kind;
+  const isFlash = (a: ActionDef) => flashActionKind === a.kind;
 
   const btnClass = (a: ActionDef, base: string) =>
-    base + ' stat-' + a.kind + ' ' + a.tone + (isPending(a) ? ' is-pending' : '');
+    base + ' stat-' + a.kind + ' ' + a.tone +
+    (isPending(a) ? ' is-pending' : '') +
+    (isFlash(a) ? ' is-flash' : '');
+
+  // key ของปุ่ม: ถ้าปุ่มนี้กำลัง flash ให้ผูก nonce เข้าไปด้วย เพื่อ re-mount
+  // บังคับ animation เล่นใหม่ แม้กดปุ่มเดิมซ้ำติดๆ กัน
+  const btnKey = (a: ActionDef) =>
+    isFlash(a) ? a.kind + '-' + flashActionNonce : a.kind;
 
   return (
     <div className="action-pad">
@@ -51,10 +70,11 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
         <div className="action-quick">
           {quickActions.map((a) => (
             <button
-              key={a.kind}
+              key={btnKey(a)}
               className={
                 'action-quick__btn stat-' + a.kind + ' ' + a.tone +
-                (isPending(a) ? ' is-pending' : '')
+                (isPending(a) ? ' is-pending' : '') +
+                (isFlash(a) ? ' is-flash' : '')
               }
               onClick={() => onAction(a)}
               title={a.sub}
@@ -70,7 +90,7 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
         <div className="action-grid action-grid--primary">
           {primaryActions.map((a) => (
             <button
-              key={a.kind}
+              key={btnKey(a)}
               className={btnClass(a, 'action-btn action-btn--primary')}
               onClick={() => onAction(a)}
             >
@@ -84,7 +104,7 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
         <div className="action-grid action-grid--wide">
           {wideActions.map((a) => (
             <button
-              key={a.kind}
+              key={btnKey(a)}
               className={btnClass(a, 'action-btn action-btn--wide')}
               onClick={() => onAction(a)}
             >
@@ -97,7 +117,7 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
         <div className="action-grid action-grid--foul">
           {foulActions.map((a) => (
             <button
-              key={a.kind}
+              key={btnKey(a)}
               className={btnClass(a, 'action-btn action-btn--mid')}
               onClick={() => onAction(a)}
             >
@@ -111,7 +131,7 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
         <div className="action-grid action-grid--foul">
           {ftActions.map((a) => (
             <button
-              key={a.kind}
+              key={btnKey(a)}
               className={btnClass(a, 'action-btn action-btn--mid')}
               onClick={() => onAction(a)}
             >

@@ -50,6 +50,9 @@ export function LivePage({
   const [flashPlayerId, setFlashPlayerId] = useState<string | null>(null);
   // bump ทุกครั้งที่ flash เพื่อ re-trigger animation (flash คนเดิมซ้ำได้)
   const [flashNonce, setFlashNonce] = useState(0);
+  // ปุ่ม action ล่าสุดที่กดบันทึก (ไว้ให้ปุ่มนั้นกระพริบวาบ) + nonce re-trigger
+  const [flashActionKind, setFlashActionKind] = useState<string | null>(null);
+  const [flashActionNonce, setFlashActionNonce] = useState(0);
   // เมื่อ action ที่ต้องเลือกแต้ม (ฟาวล์ได้/เสีย) ครบคู่กับผู้เล่นแล้ว -> เปิดถาม 1/2/3
   const [pointsPrompt, setPointsPrompt] = useState<{
     action: ActionDef;
@@ -96,6 +99,12 @@ export function LivePage({
   function commit(action: ActionDef, playerId: string, points?: number) {
     onPushEvent({ kind: action.kind, playerId, ...(points ? { points } : {}) });
     triggerFlash(playerId);
+    // ให้ปุ่ม action ที่กดกระพริบวาบ (รู้สึกว่ากดโดน + บันทึกแล้ว)
+    setFlashActionKind(action.kind);
+    setFlashActionNonce((n) => n + 1);
+    window.setTimeout(() => {
+      setFlashActionKind((cur) => (cur === action.kind ? null : cur));
+    }, 350);
   }
 
   /** ตัดสินใจบันทึก: ถ้า action ต้องเลือกแต้ม -> เปิด prompt, ไม่งั้น commit เลย */
@@ -224,6 +233,8 @@ export function LivePage({
                 onAction={handleAction}
                 onClose={handleClearSelection}
                 pendingAction={pendingAction}
+                flashActionKind={flashActionKind}
+                flashActionNonce={flashActionNonce}
               />
             )}
           </section>
