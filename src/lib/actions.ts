@@ -10,9 +10,10 @@ export interface ActionDef {
   /** กลุ่มการแสดงผลในหน้า Live:
    *  - primary: ยิง 2P/3P (grid 2×2 ใหญ่สุด)
    *  - wide: ปุ่มยาวเต็มแถว (TO)
-   *  - foul: Foul+/Foul−/FT✓/FT✗ (grid 2×2)
-   *  - quick: REB/AST/STL/BLK (แถวเล็ก) */
-  group: 'primary' | 'wide' | 'foul' | 'quick';
+   *  - foul: Foul+/Foul− (grid 2 ปุ่ม)
+   *  - ft: FT✓/FT✗ (grid 2 ปุ่ม)
+   *  - quick: REB/AST/STL/BLK (แถวเล็ก ข้างชื่อตอนเลือกคน) */
+  group: 'primary' | 'wide' | 'foul' | 'ft' | 'quick';
   /** กดแล้วต้องเลือกจำนวนแต้ม (1/2/3) ก่อนบันทึก — ใช้กับฟาวล์ที่ได้/เสียแต้มทันที */
   asksPoints?: boolean;
 }
@@ -26,8 +27,8 @@ export const ACTIONS: ActionDef[] = [
   { kind: 'TO', label: 'Turnover', sub: 'Turnover', tone: 'neutral', group: 'wide' },
   { kind: 'FOUL_DRAWN', label: 'Foul +', sub: 'โดนฟาวล์ ได้แต้ม', tone: 'make', asksPoints: true, group: 'foul' },
   { kind: 'PF', label: 'Foul −', sub: 'ทำฟาวล์ เสียแต้ม', tone: 'foul', asksPoints: true, group: 'foul' },
-  { kind: 'FT_MAKE', label: 'FT ✓', sub: 'Free throw make', tone: 'make', group: 'foul' },
-  { kind: 'FT_MISS', label: 'FT ✗', sub: 'Free throw miss', tone: 'miss', group: 'foul' },
+  { kind: 'FT_MAKE', label: 'FT ✓', sub: 'Free throw make', tone: 'make', group: 'ft' },
+  { kind: 'FT_MISS', label: 'FT ✗', sub: 'Free throw miss', tone: 'miss', group: 'ft' },
   { kind: 'REB', label: 'REB', sub: 'Rebound', tone: 'neutral', group: 'quick' },
   { kind: 'AST', label: 'AST', sub: 'Assist', tone: 'neutral', group: 'quick' },
   { kind: 'STL', label: 'STL', sub: 'Steal', tone: 'neutral', group: 'quick' },

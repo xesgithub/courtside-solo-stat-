@@ -13,6 +13,7 @@ interface Props {
 const primaryActions = ACTIONS.filter((a) => a.group === 'primary');
 const wideActions = ACTIONS.filter((a) => a.group === 'wide');
 const foulActions = ACTIONS.filter((a) => a.group === 'foul');
+const ftActions = ACTIONS.filter((a) => a.group === 'ft');
 const quickActions = ACTIONS.filter((a) => a.group === 'quick');
 
 export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
@@ -30,6 +31,21 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
             <span className="action-selected__who">
               <span className="num">#{player.number}</span> {player.name}
             </span>
+            <div className="action-quick">
+              {quickActions.map((a) => (
+                <button
+                  key={a.kind}
+                  className={
+                    'action-quick__btn stat-' + a.kind + ' ' + a.tone +
+                    (isPending(a) ? ' is-pending' : '')
+                  }
+                  onClick={() => onAction(a)}
+                  title={a.sub}
+                >
+                  {a.label}
+                </button>
+              ))}
+            </div>
             <button className="btn btn--ghost" onClick={onClose} aria-label="Clear selection">
               ✕
             </button>
@@ -60,19 +76,22 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
           ))}
         </div>
 
-        {/* REB/AST/STL/BLK — แถวเล็ก 4 ปุ่ม (อยู่บน ถัดจาก 2PT/3PT) */}
-        <div className="action-grid action-grid--quick">
-          {quickActions.map((a) => (
-            <button
-              key={a.kind}
-              className={btnClass(a, 'action-btn action-btn--mid')}
-              onClick={() => onAction(a)}
-            >
-              <span className="action-btn__label">{a.label}</span>
-              {a.sub && <span className="action-btn__sub">{a.sub}</span>}
-            </button>
-          ))}
-        </div>
+        {/* REB/AST/STL/BLK — แสดงเป็น grid เฉพาะตอน "ยังไม่เลือกคน"
+            (ถ้าเลือกคนแล้วจะไปอยู่แถบ quick เล็กๆ ข้างชื่อผู้เล่นด้านบน) */}
+        {!player && (
+          <div className="action-grid action-grid--quick">
+            {quickActions.map((a) => (
+              <button
+                key={a.kind}
+                className={btnClass(a, 'action-btn action-btn--mid')}
+                onClick={() => onAction(a)}
+              >
+                <span className="action-btn__label">{a.label}</span>
+                {a.sub && <span className="action-btn__sub">{a.sub}</span>}
+              </button>
+            ))}
+          </div>
+        )}
 
         {/* Turnover — ปุ่มยาวเต็มแถว */}
         <div className="action-grid action-grid--wide">
@@ -87,9 +106,23 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
           ))}
         </div>
 
-        {/* Foul +/− และ FT ✓/✗ — grid 2×2 */}
+        {/* Foul +/− — grid 2 ปุ่ม */}
         <div className="action-grid action-grid--foul">
           {foulActions.map((a) => (
+            <button
+              key={a.kind}
+              className={btnClass(a, 'action-btn action-btn--mid')}
+              onClick={() => onAction(a)}
+            >
+              <span className="action-btn__label">{a.label}</span>
+              {a.sub && <span className="action-btn__sub">{a.sub}</span>}
+            </button>
+          ))}
+        </div>
+
+        {/* FT ✓/✗ — grid 2 ปุ่ม */}
+        <div className="action-grid action-grid--foul">
+          {ftActions.map((a) => (
             <button
               key={a.kind}
               className={btnClass(a, 'action-btn action-btn--mid')}

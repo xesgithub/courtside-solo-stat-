@@ -2219,11 +2219,11 @@ button {
   font-size: 16px;
 }
 
-/* Foul +/− และ FT ✓/✗ — grid 2×2 */
+/* Foul +/− และ FT ✓/✗ — แต่ละกลุ่ม grid 2 ปุ่ม (แยกคนละแถว) */
 .action-grid--foul {
   grid-template-columns: repeat(2, 1fr);
-  grid-auto-rows: minmax(52px, 1fr);
-  flex: 4;
+  grid-auto-rows: minmax(50px, 1fr);
+  flex: 3;
 }
 
 /* REB/AST/STL/BLK — แถวเล็ก 4 ปุ่ม */
