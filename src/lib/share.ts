@@ -14,10 +14,43 @@ export async function elementToBlob(el: HTMLElement): Promise<Blob> {
     ? rawBg
     : '#0d0f14';
 
-  // ขนาดจริงของเนื้อหา (รวมส่วนที่ถูก overflow:hidden ซ่อน) — ใช้ scrollWidth/Height
-  // กันกรณี element อยู่ใน container ที่ overflow:hidden แล้ว capture ได้ภาพว่าง/ตัด
-  const width = Math.ceil(Math.max(el.scrollWidth, el.offsetWidth, el.clientWidth));
-  const height = Math.ceil(Math.max(el.scrollHeight, el.offsetHeight, el.clientHeight));
+  // --- ขยาย DOM จริงชั่วคราว เพื่อให้ "เห็นเนื้อหาครบ" ตอน capture ---
+  // สาเหตุภาพโดนตัด: element อยู่ใน container ที่ overflow:auto/hidden + ความสูงจำกัดจอ
+  // html2canvas วัดขนาดจาก element ต้นฉบับ (ไม่ใช่ clone) จึงต้องปลด clamp บน DOM จริงก่อนวัด
+  const target = el;
+  // เก็บ element ที่จะแก้ + inline style เดิม ไว้คืนสภาพภายหลัง
+  const touched: { node: HTMLElement; cssText: string }[] = [];
+  const expand = (node: HTMLElement) => {
+    touched.push({ node, cssText: node.style.cssText });
+  };
+  // ตัว target เอง + ทุก descendant ที่ clamp ความสูง/ซ่อน overflow
+  expand(target);
+  target.querySelectorAll<HTMLElement>('*').forEach((node) => {
+    const cs = getComputedStyle(node);
+    if (
+      cs.overflow !== 'visible' ||
+      cs.overflowY !== 'visible' ||
+      cs.overflowX !== 'visible' ||
+      cs.maxHeight !== 'none'
+    ) {
+      expand(node);
+    }
+  });
+  // ปลด clamp: ให้ความสูง auto, overflow มองเห็น, ไม่จำกัด max
+  for (const { node } of touched) {
+    node.style.overflow = 'visible';
+    node.style.overflowY = 'visible';
+    node.style.overflowX = 'visible';
+    node.style.maxHeight = 'none';
+    node.style.height = 'auto';
+    node.style.flex = 'none';
+  }
+  target.style.background = bg;
+
+  // บังคับ reflow แล้วค่อยวัดขนาดจริง (ตอนนี้เนื้อหากางเต็มแล้ว)
+  void target.offsetHeight;
+  const width = Math.ceil(Math.max(target.scrollWidth, target.offsetWidth));
+  const height = Math.ceil(Math.max(target.scrollHeight, target.offsetHeight));
 
   // จำกัดขนาด canvas ไม่ให้เกิน limit ของ Safari/iOS (~16.7M px ต่อด้าน/รวม)
   // ถ้าใหญ่เกินจะได้ canvas ว่าง = ภาพดำ -> ลด scale ลงอัตโนมัติ
@@ -33,32 +66,37 @@ export async function elementToBlob(el: HTMLElement): Promise<Blob> {
     scale -= 0.5;
   }
 
-  const canvas = await html2canvas(el, {
-    backgroundColor: bg,
-    scale,
-    useCORS: true,
-    logging: false,
-    width,
-    height,
-    windowWidth: width,
-    windowHeight: height,
-    scrollX: 0,
-    scrollY: 0,
-    // บน element ที่ clone: ตั้งพื้นหลังทึบ + ปลดการตัด overflow ให้เห็นเนื้อหาครบ
-    onclone: (_doc, element) => {
-      element.style.background = bg;
-      element.style.overflow = 'visible';
-      element.style.maxHeight = 'none';
-      element.style.height = 'auto';
-      element.querySelectorAll<HTMLElement>('*').forEach((node) => {
-        const cs = getComputedStyle(node);
-        if (cs.overflow !== 'visible' || cs.maxHeight !== 'none') {
+  let canvas: HTMLCanvasElement;
+  try {
+    canvas = await html2canvas(target, {
+      backgroundColor: bg,
+      scale,
+      useCORS: true,
+      logging: false,
+      width,
+      height,
+      windowWidth: width,
+      windowHeight: height,
+      scrollX: 0,
+      scrollY: 0,
+      // เผื่อ clone: ตั้งพื้นหลังทึบ + ปลด clamp อีกชั้น (กันกรณีมีลูกที่ยังตัดอยู่)
+      onclone: (_doc, element) => {
+        element.style.background = bg;
+        element.style.overflow = 'visible';
+        element.style.maxHeight = 'none';
+        element.style.height = 'auto';
+        element.querySelectorAll<HTMLElement>('*').forEach((node) => {
           node.style.overflow = 'visible';
           node.style.maxHeight = 'none';
-        }
-      });
-    },
-  });
+        });
+      },
+    });
+  } finally {
+    // คืนสภาพ DOM จริงเสมอ (แม้ capture ล้มเหลว) เพื่อไม่ให้หน้าจอเพี้ยน
+    for (const { node, cssText } of touched) {
+      node.style.cssText = cssText;
+    }
+  }
 
   // กันกรณีได้ canvas ว่าง (0 px) จริงๆ -> โยน error ให้ชั้นบน alert แจ้งผู้ใช้
   if (!canvas.width || !canvas.height) {
