@@ -53,6 +53,7 @@ export function buildBoxScoreCsv(
     'BLK',
     'TO',
     'PF',
+    'FD',
   ];
   lines.push(csvRow(header));
 
@@ -73,6 +74,7 @@ export function buildBoxScoreCsv(
       l.blk,
       l.to,
       l.pf,
+      l.fd,
     ]);
 
   // แถวผู้เล่น
@@ -82,7 +84,7 @@ export function buildBoxScoreCsv(
 
   // แถว Team (ถ้ามีสถิติที่ไม่ระบุตัว)
   const t = box.teamLine;
-  if (t.pts || t.reb || t.ast || t.stl || t.blk || t.to || t.pf) {
+  if (t.pts || t.reb || t.ast || t.stl || t.blk || t.to || t.pf || t.fd) {
     lines.push(rowFor('Team (no player)', t));
   }
 

@@ -97,7 +97,12 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
     [game.players],
   );
 
-  const showTeamRow = box.teamLine.ast > 0 || box.teamLine.reb > 0;
+  const showTeamRow =
+    box.teamLine.ast > 0 ||
+    box.teamLine.reb > 0 ||
+    box.teamLine.pts > 0 ||
+    box.teamLine.pf > 0 ||
+    box.teamLine.fd > 0;
   // ค่าสูงสุดแต่ละหมวด (เฉพาะผู้เล่นจริง) ไว้ไฮไลต์ leader ในตาราง
   const leaders = useMemo(() => computeLeaders(box.lines), [box.lines]);
 
@@ -134,6 +139,7 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
         <td>{line.blk}</td>
         <td>{line.to}</td>
         <td className="col-pf">{line.pf}</td>
+        <td className="col-fd">{line.fd}</td>
       </tr>
     );
   }
@@ -230,6 +236,7 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                 <th>BLK</th>
                 <th>TO</th>
                 <th>PF</th>
+                <th title="Foul drawn (โดนฟาวล์ได้แต้ม)">FD</th>
               </tr>
             </thead>
             <tbody>
@@ -276,6 +283,7 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                     <td>{line.blk}</td>
                     <td>{line.to}</td>
                     <td className="col-pf">{line.pf}</td>
+                    <td className="col-fd">{line.fd}</td>
                   </tr>
                 );
               })}

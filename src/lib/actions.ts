@@ -13,6 +13,8 @@ export interface ActionDef {
   mid?: boolean;
   /** ปุ่มรอง (TO/PF/FT) แสดงเป็นแถบเล็กข้างชื่อผู้เล่นใน ActionPad */
   quick?: boolean;
+  /** กดแล้วต้องเลือกจำนวนแต้ม (1/2/3) ก่อนบันทึก — ใช้กับฟาวล์ที่ได้/เสียแต้มทันที */
+  asksPoints?: boolean;
 }
 
 /** ปุ่ม action ในหน้า Live (เรียงตามลำดับที่แสดง) */
@@ -26,7 +28,8 @@ export const ACTIONS: ActionDef[] = [
   { kind: 'STL', label: 'STL', sub: 'Steal', tone: 'neutral', mid: true },
   { kind: 'BLK', label: 'BLK', sub: 'Block', tone: 'neutral', mid: true },
   { kind: 'TO', label: 'Turnover', sub: 'Turnover', tone: 'neutral', quick: true },
-  { kind: 'PF', label: 'Foul', sub: '+1 opp', tone: 'foul', quick: true },
+  { kind: 'FOUL_DRAWN', label: 'Foul +', sub: 'โดนฟาวล์ ได้แต้ม', tone: 'make', asksPoints: true, quick: true },
+  { kind: 'PF', label: 'Foul −', sub: 'ทำฟาวล์ เสียแต้ม', tone: 'foul', asksPoints: true, quick: true },
   { kind: 'FT_MAKE', label: 'Free throw', sub: '+1', tone: 'make', quick: true },
 ];
 
@@ -41,6 +44,7 @@ export const STAT_LABEL: Record<StatKind, string> = {
   STL: 'Steal',
   BLK: 'Block',
   TO: 'Turnover',
-  PF: 'Foul',
+  PF: 'Foul (−pts)',
+  FOUL_DRAWN: 'Foul (+pts)',
   PTS_ADJ: 'Team pts adj',
 };

@@ -16,6 +16,7 @@ function line(id: string, pts: number, reb: number, ast: number): PlayerLine {
     blk: 0,
     to: 0,
     pf: 0,
+    fd: 0,
   };
 }
 

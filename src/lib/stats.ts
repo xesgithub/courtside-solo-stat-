@@ -9,6 +9,7 @@ export function pointsForKind(kind: StatKind): number {
       return 3;
     case 'FT_MAKE':
       return 1;
+    // FOUL_DRAWN: แต้มผันแปร (1-3) เก็บใน event.points ไม่ใช่ค่าคงที่ -> คืน 0 ที่นี่
     default:
       return 0;
   }
@@ -29,6 +30,8 @@ export interface PlayerLine {
   blk: number;
   to: number;
   pf: number;
+  /** จำนวนครั้งที่ "โดนฟาวล์แล้วได้แต้ม" (foul drawn) */
+  fd: number;
 }
 
 function emptyLine(playerId: string): PlayerLine {
@@ -46,6 +49,7 @@ function emptyLine(playerId: string): PlayerLine {
     blk: 0,
     to: 0,
     pf: 0,
+    fd: 0,
   };
 }
 
@@ -87,7 +91,14 @@ function applyEvent(line: PlayerLine, kind: StatKind, points = 0): void {
       line.to += 1;
       break;
     case 'PF':
+      // ทีมเราทำฟาวล์ -> นับจำนวนครั้ง (แต้มที่คู่แข่งได้คิดใน computeOpponentScore)
       line.pf += 1;
+      break;
+    case 'FOUL_DRAWN':
+      // ทีมเราโดนฟาวล์แล้วได้แต้มทันที (กติกาสนาม) -> บวกแต้มเข้าทีมเรา
+      // migrate: ถ้าไม่มี points (เผื่ออนาคต) ให้ถือเป็น 1
+      line.fd += 1;
+      line.pts += points > 0 ? points : 1;
       break;
     case 'PTS_ADJ':
       // ปรับแต้มทีมแบบเร็ว (ไม่ระบุตัว) — บวก/ลบเข้าคะแนนอย่างเดียว
@@ -141,16 +152,24 @@ export function computeBoxScore(players: Player[], events: StatEvent[]): BoxScor
     totals.blk += l.blk;
     totals.to += l.to;
     totals.pf += l.pf;
+    totals.fd += l.fd;
   });
 
   // กันแต้มทีมติดลบ (เช่นกดปรับแต้ม −1 รัวเกิน) — แต้มบาสไม่ควรน้อยกว่า 0
   return { lines, teamLine, totals, teamScore: Math.max(0, totals.pts) };
 }
 
-/** คะแนนรวมของคู่แข่ง = ผลรวม delta ของ opponentEvents + PF ของทีมเรา (ฟาวล์ -> คู่แข่ง +1) */
+/**
+ * คะแนนรวมของคู่แข่ง = ผลรวม delta ของ opponentEvents
+ *   + แต้มที่คู่แข่งได้จากการที่ "ทีมเราทำฟาวล์" (PF)
+ *     - PF ใหม่: บวกตาม event.points (1-3 แต้มตามจังหวะฟาวล์)
+ *     - PF เก่า (ไม่มี points): ถือเป็น 1 แต้ม เพื่อคงคะแนนเกมเก่าไม่ให้เพี้ยน (migrate)
+ */
 export function computeOpponentScore(game: Game): number {
   const fromEvents = game.opponentEvents.reduce((s, e) => s + e.delta, 0);
-  const fromFouls = game.events.filter((e) => e.kind === 'PF').length;
+  const fromFouls = game.events
+    .filter((e) => e.kind === 'PF')
+    .reduce((s, e) => s + (e.points && e.points > 0 ? e.points : 1), 0);
   return Math.max(0, fromEvents + fromFouls);
 }
 

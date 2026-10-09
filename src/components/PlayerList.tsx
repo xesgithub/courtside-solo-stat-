@@ -12,6 +12,10 @@ interface Props {
   flashId?: string | null;
   /** true = มี action ค้างรออยู่ รอผู้ใช้แตะคน (ทำให้การ์ดดูเชิญชวนให้แตะ) */
   awaitingPick?: boolean;
+  /** เวลา auto-cancel การเลือกคน (ms) — ใช้วาดแถบนับถอยหลังบนการ์ดที่เลือก */
+  selectTimeoutMs?: number;
+  /** เปลี่ยนค่าทุกครั้งที่รีสตาร์ทตัวจับเวลา — ใช้เป็น key รีสตาร์ท animation */
+  selectNonce?: number;
 }
 
 // ต้องขยับเกินระยะนี้ถึงนับว่าเป็น "ลาก" ไม่งั้นถือเป็น "แตะเลือก"
@@ -25,6 +29,8 @@ export function PlayerList({
   onTogglePin,
   flashId,
   awaitingPick,
+  selectTimeoutMs = 6000,
+  selectNonce = 0,
 }: Props) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -157,6 +163,15 @@ export function PlayerList({
             )}
             <span className="player-card__num">{p.number}</span>
             <span className="player-card__name">{p.name}</span>
+            {/* แถบนับถอยหลัง auto-cancel (เฉพาะคนที่เลือกค้างอยู่) */}
+            {selectedId === p.id && (
+              <span
+                key={selectNonce}
+                className="player-card__countdown"
+                style={{ animationDuration: `${selectTimeoutMs}ms` }}
+                aria-hidden
+              />
+            )}
           </div>
         );
       })}

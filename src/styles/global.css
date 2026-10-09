@@ -2214,3 +2214,98 @@ button {
 .box-capture {
   background: var(--bg);
 }
+
+/* ---- แถบนับถอยหลัง auto-cancel บนการ์ดผู้เล่นที่เลือกค้างไว้ ---- */
+.player-card {
+  overflow: hidden; /* กันแถบ countdown ล้นมุมโค้ง */
+}
+.player-card__countdown {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 3px;
+  width: 100%;
+  background: var(--team);
+  transform-origin: left center;
+  animation-name: countdown-shrink;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+  pointer-events: none;
+}
+@keyframes countdown-shrink {
+  from { transform: scaleX(1); opacity: 0.9; }
+  to   { transform: scaleX(0); opacity: 0.4; }
+}
+
+
+/* ============================================================
+   Popup เลือกแต้มฟาวล์ (ได้/เสีย 1-3) + คอลัมน์ FD ในตาราง
+   ============================================================ */
+.points-prompt {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: min(360px, 90vw);
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.points-prompt__head {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: center;
+}
+.points-prompt__title {
+  font-size: 16px;
+  font-weight: 800;
+}
+.points-prompt__title.is-gain {
+  color: var(--make);
+}
+.points-prompt__title.is-loss {
+  color: var(--foul);
+}
+.points-prompt__who {
+  font-size: 13px;
+  color: var(--text-dim);
+  font-weight: 700;
+}
+.points-prompt__grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+.points-prompt__btn {
+  padding: 20px 0;
+  font-size: 26px;
+  font-weight: 800;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border);
+  font-variant-numeric: tabular-nums;
+  transition: filter 0.1s, transform 0.08s;
+}
+.points-prompt__btn:active {
+  transform: scale(0.93);
+  filter: brightness(1.25);
+}
+.points-prompt__btn.is-gain {
+  background: var(--make-soft);
+  border-color: var(--make);
+  color: var(--make);
+}
+.points-prompt__btn.is-loss {
+  background: var(--foul-soft);
+  border-color: var(--foul);
+  color: var(--foul);
+}
+.points-prompt__cancel {
+  align-self: center;
+}
+
+/* คอลัมน์ FD (โดนฟาวล์ได้แต้ม) โทนเขียวจางเหมือนแต้มได้ */
+.full-box td.col-fd {
+  color: var(--make);
+}
