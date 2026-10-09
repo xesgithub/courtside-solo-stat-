@@ -843,16 +843,21 @@ button {
 
 .action-selected {
   display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+.action-selected__top {
+  display: flex;
   align-items: center;
   gap: 10px;
-  margin-bottom: 10px;
   min-height: 26px;
 }
 .action-selected__who {
   font-weight: 800;
   font-size: 18px;
   white-space: nowrap;
-  flex: 0 0 auto;
+  flex: 1;
 }
 .action-selected__who .num {
   color: var(--team);
@@ -929,16 +934,13 @@ button {
   font-weight: 800;
 }
 
-/* ปุ่มรอง (TO/PF/FT) ข้างชื่อผู้เล่นใน ActionPad */
+/* แถบ quick REB/AST/STL/BLK — เต็มกว้าง 4 ปุ่มเท่ากัน อยู่ที่เดิมเสมอ */
 .action-quick {
-  flex: 1;
   display: flex;
   gap: 8px;
-  justify-content: flex-end;
 }
 .action-quick__btn {
   flex: 1;
-  max-width: 120px;
   padding: 12px 8px;
   border-radius: var(--radius-sm);
   background: var(--neutral-soft);

@@ -26,39 +26,43 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
   return (
     <div className="action-pad">
       <div className="action-selected">
-        {player ? (
-          <>
-            <span className="action-selected__who">
-              <span className="num">#{player.number}</span> {player.name}
+        <div className="action-selected__top">
+          {player ? (
+            <>
+              <span className="action-selected__who">
+                <span className="num">#{player.number}</span> {player.name}
+              </span>
+              <button className="btn btn--ghost" onClick={onClose} aria-label="Clear selection">
+                ✕
+              </button>
+            </>
+          ) : pendingAction ? (
+            <span className="action-selected__hint action-selected__hint--pending">
+              เลือกแล้ว: <b>{pendingAction.label} {pendingAction.sub}</b> — แตะผู้เล่นเพื่อบันทึก
             </span>
-            <div className="action-quick">
-              {quickActions.map((a) => (
-                <button
-                  key={a.kind}
-                  className={
-                    'action-quick__btn stat-' + a.kind + ' ' + a.tone +
-                    (isPending(a) ? ' is-pending' : '')
-                  }
-                  onClick={() => onAction(a)}
-                  title={a.sub}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </div>
-            <button className="btn btn--ghost" onClick={onClose} aria-label="Clear selection">
-              ✕
+          ) : (
+            <span className="action-selected__hint">
+              แตะผู้เล่นทางซ้าย หรือกดปุ่มสถิติก่อนก็ได้
+            </span>
+          )}
+        </div>
+
+        {/* แถบ quick REB/AST/STL/BLK — อยู่ที่เดิมเสมอ ไม่ว่าจะเลือกคนหรือยัง */}
+        <div className="action-quick">
+          {quickActions.map((a) => (
+            <button
+              key={a.kind}
+              className={
+                'action-quick__btn stat-' + a.kind + ' ' + a.tone +
+                (isPending(a) ? ' is-pending' : '')
+              }
+              onClick={() => onAction(a)}
+              title={a.sub}
+            >
+              {a.label}
             </button>
-          </>
-        ) : pendingAction ? (
-          <span className="action-selected__hint action-selected__hint--pending">
-            เลือกแล้ว: <b>{pendingAction.label} {pendingAction.sub}</b> — แตะผู้เล่นเพื่อบันทึก
-          </span>
-        ) : (
-          <span className="action-selected__hint">
-            แตะผู้เล่นทางซ้าย หรือกดปุ่มสถิติก่อนก็ได้
-          </span>
-        )}
+          ))}
+        </div>
       </div>
 
       <div className="action-groups">
@@ -75,23 +79,6 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
             </button>
           ))}
         </div>
-
-        {/* REB/AST/STL/BLK — แสดงเป็น grid เฉพาะตอน "ยังไม่เลือกคน"
-            (ถ้าเลือกคนแล้วจะไปอยู่แถบ quick เล็กๆ ข้างชื่อผู้เล่นด้านบน) */}
-        {!player && (
-          <div className="action-grid action-grid--quick">
-            {quickActions.map((a) => (
-              <button
-                key={a.kind}
-                className={btnClass(a, 'action-btn action-btn--mid')}
-                onClick={() => onAction(a)}
-              >
-                <span className="action-btn__label">{a.label}</span>
-                {a.sub && <span className="action-btn__sub">{a.sub}</span>}
-              </button>
-            ))}
-          </div>
-        )}
 
         {/* Turnover — ปุ่มยาวเต็มแถว */}
         <div className="action-grid action-grid--wide">
