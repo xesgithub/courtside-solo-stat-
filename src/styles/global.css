@@ -965,6 +965,27 @@ button {
   border-color: rgba(251, 146, 60, 0.4);
   color: #fb923c;
 }
+/* สีประจำสถิติของแถบ quick: REB ฟ้า / AST เหลือง / STL มิ้นต์ / BLK ม่วง */
+.action-quick__btn.stat-REB {
+  background: var(--reb-soft);
+  border-color: rgba(56, 189, 248, 0.4);
+  color: var(--reb);
+}
+.action-quick__btn.stat-AST {
+  background: var(--ast-soft);
+  border-color: rgba(251, 191, 36, 0.4);
+  color: var(--ast);
+}
+.action-quick__btn.stat-STL {
+  background: var(--stl-soft);
+  border-color: rgba(45, 212, 191, 0.4);
+  color: var(--stl);
+}
+.action-quick__btn.stat-BLK {
+  background: var(--blk-soft);
+  border-color: rgba(192, 132, 252, 0.4);
+  color: var(--blk);
+}
 .action-quick__btn:active {
   transform: scale(0.94);
 }
