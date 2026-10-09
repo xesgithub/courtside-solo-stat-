@@ -26,21 +26,6 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
             <span className="action-selected__who">
               <span className="num">#{player.number}</span> {player.name}
             </span>
-            <div className="action-quick">
-              {quickActions.map((a) => (
-                <button
-                  key={a.kind}
-                  className={
-                    'action-quick__btn stat-' + a.kind + ' ' + a.tone +
-                    (isPending(a) ? ' is-pending' : '')
-                  }
-                  onClick={() => onAction(a)}
-                  title={a.sub}
-                >
-                  {a.label}
-                </button>
-              ))}
-            </div>
             <button className="btn btn--ghost" onClick={onClose} aria-label="Clear selection">
               ✕
             </button>
@@ -91,24 +76,23 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
           ))}
         </div>
 
-        {/* ปุ่มรอง (TO/PF/FT) — แสดงเมื่อยังไม่เลือกคน (ถ้าเลือกคนแล้วจะอยู่แถบ quick ข้างชื่อ) */}
-        {!player && (
-          <div className="action-grid action-grid--quick">
-            {quickActions.map((a) => (
-              <button
-                key={a.kind}
-                className={
-                  'action-btn action-btn--mid stat-' + a.kind + ' ' + a.tone +
-                  (isPending(a) ? ' is-pending' : '')
-                }
-                onClick={() => onAction(a)}
-              >
-                <span className="action-btn__label">{a.label}</span>
-                {a.sub && <span className="action-btn__sub">{a.sub}</span>}
-              </button>
-            ))}
-          </div>
-        )}
+        {/* ปุ่มรอง (TO/Foul+/Foul−/FT) — อยู่ตำแหน่งเดิมเสมอ ไม่ว่าจะเลือกคนหรือยัง
+            (กันปุ่มเด้งสลับที่เวลาเลือก/ยกเลิกการเลือกคน) */}
+        <div className="action-grid action-grid--quick">
+          {quickActions.map((a) => (
+            <button
+              key={a.kind}
+              className={
+                'action-btn action-btn--mid stat-' + a.kind + ' ' + a.tone +
+                (isPending(a) ? ' is-pending' : '')
+              }
+              onClick={() => onAction(a)}
+            >
+              <span className="action-btn__label">{a.label}</span>
+              {a.sub && <span className="action-btn__sub">{a.sub}</span>}
+            </button>
+          ))}
+        </div>
       </div>
     </div>
   );

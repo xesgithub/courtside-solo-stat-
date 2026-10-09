@@ -133,6 +133,10 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
           {line.fg3m}/{line.fg3a}
         </td>
         <td className="pct">{pct(line.fg3m, line.fg3a)}</td>
+        <td>
+          {line.ftm}/{line.fta}
+        </td>
+        <td className="pct">{pct(line.ftm, line.fta)}</td>
         <td>{line.reb}</td>
         <td>{line.ast}</td>
         <td>{line.stl}</td>
@@ -230,6 +234,8 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                 <th>FG%</th>
                 <th>3PT</th>
                 <th>3P%</th>
+                <th>FT</th>
+                <th>FT%</th>
                 <th>REB</th>
                 <th>AST</th>
                 <th>STL</th>
@@ -265,6 +271,10 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                       {line.fg3m}/{line.fg3a}
                     </td>
                     <td className="pct">{pct(line.fg3m, line.fg3a)}</td>
+                    <td>
+                      {line.ftm}/{line.fta}
+                    </td>
+                    <td className="pct">{pct(line.ftm, line.fta)}</td>
                     <td
                       className={
                         line.reb > 0 && line.reb === leaders.reb ? 'is-leader' : undefined

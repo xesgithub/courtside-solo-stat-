@@ -24,6 +24,8 @@ export interface PlayerLine {
   fg3m: number;
   fg3a: number;
   ftm: number;
+  /** ฟรีโธรว์ที่ยิง (made + miss) ไว้คิด FT% */
+  fta: number;
   reb: number;
   ast: number;
   stl: number;
@@ -43,6 +45,7 @@ function emptyLine(playerId: string): PlayerLine {
     fg3m: 0,
     fg3a: 0,
     ftm: 0,
+    fta: 0,
     reb: 0,
     ast: 0,
     stl: 0,
@@ -73,7 +76,11 @@ function applyEvent(line: PlayerLine, kind: StatKind, points = 0): void {
       break;
     case 'FT_MAKE':
       line.ftm += 1;
+      line.fta += 1;
       line.pts += 1;
+      break;
+    case 'FT_MISS':
+      line.fta += 1;
       break;
     case 'REB':
       line.reb += 1;
@@ -146,6 +153,7 @@ export function computeBoxScore(players: Player[], events: StatEvent[]): BoxScor
     totals.fg3m += l.fg3m;
     totals.fg3a += l.fg3a;
     totals.ftm += l.ftm;
+    totals.fta += l.fta;
     totals.reb += l.reb;
     totals.ast += l.ast;
     totals.stl += l.stl;

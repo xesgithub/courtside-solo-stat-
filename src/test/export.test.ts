@@ -27,11 +27,11 @@ describe('buildBoxScoreCsv', () => {
     // มี BOM นำหน้า
     expect(csv.startsWith('\uFEFF')).toBe(true);
     // มีหัวคอลัมน์
-    expect(csv).toContain('Player,PTS,FG,FG%,3PT,3P%,REB,AST,STL,BLK,TO,PF,FD');
-    // มีแถวผู้เล่น Jay: 3 แต้ม, 3PT 1/1
+    expect(csv).toContain('Player,PTS,FG,FG%,3PT,3P%,FT,FT%,REB,AST,STL,BLK,TO,PF,FD');
+    // มีแถวผู้เล่น Jay: 3 แต้ม, 3PT 1/1, FT 0/0 (FT% ว่าง)
     const jayRow = lines.find((l) => l.startsWith('#7 Jay'));
     expect(jayRow).toBeTruthy();
-    expect(jayRow).toContain('#7 Jay,3,1/1,100%,1/1,100%,1,1,0,0,0,0,0');
+    expect(jayRow).toContain('#7 Jay,3,1/1,100%,1/1,100%,0/0,,1,1,0,0,0,0,0');
     // มีแถว Total
     expect(lines.some((l) => l.startsWith('Total,'))).toBe(true);
   });

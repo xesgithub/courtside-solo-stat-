@@ -72,3 +72,33 @@ describe('ฟาวล์ได้/เสียแต้ม (กติกาส�
     expect(computeOpponentScore(game)).toBe(5); // 3 (delta) + 2 (foul)
   });
 });
+
+describe('ฟรีโธรว์ FTM/FTA', () => {
+  it('FT_MAKE นับ ftm+fta+pts, FT_MISS นับแค่ fta', () => {
+    const game = makeGame();
+    const pid = game.players[0].id;
+    game.events = [
+      ev({ kind: 'FT_MAKE', playerId: pid }),
+      ev({ kind: 'FT_MAKE', playerId: pid }),
+      ev({ kind: 'FT_MISS', playerId: pid }),
+    ];
+    const box = computeBoxScore(game.players, game.events);
+    const jay = box.lines[0];
+    expect(jay.ftm).toBe(2);
+    expect(jay.fta).toBe(3); // 2 ลง + 1 พลาด
+    expect(jay.pts).toBe(2); // ฟรีโธรว์ลง 2 ลูก = 2 แต้ม
+  });
+
+  it('FT ไม่ถูกรวมใน FG (fg attempt ไม่เพิ่ม)', () => {
+    const game = makeGame();
+    const pid = game.players[0].id;
+    game.events = [
+      ev({ kind: 'FT_MAKE', playerId: pid }),
+      ev({ kind: 'FT_MISS', playerId: pid }),
+    ];
+    const box = computeBoxScore(game.players, game.events);
+    const jay = box.lines[0];
+    expect(jay.fg2a).toBe(0);
+    expect(jay.fg3a).toBe(0);
+  });
+});

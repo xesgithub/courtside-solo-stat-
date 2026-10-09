@@ -10,6 +10,7 @@ function line(id: string, pts: number, reb: number, ast: number): PlayerLine {
     fg3m: 0,
     fg3a: 0,
     ftm: 0,
+    fta: 0,
     reb,
     ast,
     stl: 0,

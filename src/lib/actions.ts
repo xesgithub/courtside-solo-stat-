@@ -30,7 +30,8 @@ export const ACTIONS: ActionDef[] = [
   { kind: 'TO', label: 'Turnover', sub: 'Turnover', tone: 'neutral', quick: true },
   { kind: 'FOUL_DRAWN', label: 'Foul +', sub: 'โดนฟาวล์ ได้แต้ม', tone: 'make', asksPoints: true, quick: true },
   { kind: 'PF', label: 'Foul −', sub: 'ทำฟาวล์ เสียแต้ม', tone: 'foul', asksPoints: true, quick: true },
-  { kind: 'FT_MAKE', label: 'Free throw', sub: '+1', tone: 'make', quick: true },
+  { kind: 'FT_MAKE', label: 'FT ✓', sub: 'Free throw make', tone: 'make', quick: true },
+  { kind: 'FT_MISS', label: 'FT ✗', sub: 'Free throw miss', tone: 'miss', quick: true },
 ];
 
 export const STAT_LABEL: Record<StatKind, string> = {
@@ -38,7 +39,8 @@ export const STAT_LABEL: Record<StatKind, string> = {
   FG2_MISS: '2PT Miss',
   FG3_MAKE: '3PT Make',
   FG3_MISS: '3PT Miss',
-  FT_MAKE: 'FT +1',
+  FT_MAKE: 'FT Make',
+  FT_MISS: 'FT Miss',
   REB: 'Rebound',
   AST: 'Assist',
   STL: 'Steal',
