@@ -489,6 +489,12 @@ export default function App() {
         saved={saved}
         finished={!!game.finished}
         onToggleFinished={toggleFinished}
+        clockReminder={
+          !game.finished &&
+          !game.clock.running &&
+          game.clock.remainingMs > 0 &&
+          game.events.length > 0
+        }
       />
 
       {tab === 'live' && (

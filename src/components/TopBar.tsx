@@ -27,6 +27,9 @@ interface Props {
   /** สถานะจบเกม (ล็อกสถิติ) + สลับล็อก/ปลดล็อก */
   finished?: boolean;
   onToggleFinished: () => void;
+
+  /** true = มีการจดสถิติแล้วแต่ยังไม่เดินนาฬิกา -> เตือนให้กด START */
+  clockReminder?: boolean;
 }
 
 const TABS: { id: Tab; label: string }[] = [
@@ -49,6 +52,7 @@ export function TopBar({
   saved = false,
   finished = false,
   onToggleFinished,
+  clockReminder = false,
 }: Props) {
   const [editingClock, setEditingClock] = useState(false);
   return (
@@ -85,10 +89,13 @@ export function TopBar({
         <div className="topbar__clock-controls">
           <button
             className={
-              'clk-btn clk-btn--primary' + (clock.running ? ' running' : '')
+              'clk-btn clk-btn--primary' +
+              (clock.running ? ' running' : '') +
+              (clockReminder ? ' clk-btn--remind' : '')
             }
             onClick={onToggleClock}
             disabled={finished}
+            title={clockReminder ? 'อย่าลืมกด START เดินนาฬิกา!' : undefined}
           >
             {clock.running ? 'PAUSE' : 'START'}
           </button>

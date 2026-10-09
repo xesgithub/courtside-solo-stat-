@@ -8,14 +8,63 @@ function safeName(s: string): string {
 /** render element เป็น PNG blob ด้วย html2canvas */
 export async function elementToBlob(el: HTMLElement): Promise<Blob> {
   // อ่านสีพื้นหลังจริงของหน้า เพื่อไม่ให้รูปออกมาพื้นโปร่ง/ขาว
-  const bg =
-    getComputedStyle(document.body).backgroundColor || '#0d0f14';
+  // ถ้าอ่านไม่ได้/โปร่งใส (rgba(0,0,0,0)) ให้ fallback เป็นสีพื้นแอป
+  const rawBg = getComputedStyle(document.body).backgroundColor;
+  const bg = rawBg && rawBg !== 'rgba(0, 0, 0, 0)' && rawBg !== 'transparent'
+    ? rawBg
+    : '#0d0f14';
+
+  // ขนาดจริงของเนื้อหา (รวมส่วนที่ถูก overflow:hidden ซ่อน) — ใช้ scrollWidth/Height
+  // กันกรณี element อยู่ใน container ที่ overflow:hidden แล้ว capture ได้ภาพว่าง/ตัด
+  const width = Math.ceil(Math.max(el.scrollWidth, el.offsetWidth, el.clientWidth));
+  const height = Math.ceil(Math.max(el.scrollHeight, el.offsetHeight, el.clientHeight));
+
+  // จำกัดขนาด canvas ไม่ให้เกิน limit ของ Safari/iOS (~16.7M px ต่อด้าน/รวม)
+  // ถ้าใหญ่เกินจะได้ canvas ว่าง = ภาพดำ -> ลด scale ลงอัตโนมัติ
+  const MAX_CANVAS_PX = 16_000_000; // พื้นที่รวมที่ปลอดภัยข้ามเบราว์เซอร์
+  const MAX_SIDE = 8192; // ความยาวด้านที่ปลอดภัยบน iOS
+  let scale = 2;
+  while (
+    scale > 1 &&
+    (width * scale > MAX_SIDE ||
+      height * scale > MAX_SIDE ||
+      width * height * scale * scale > MAX_CANVAS_PX)
+  ) {
+    scale -= 0.5;
+  }
+
   const canvas = await html2canvas(el, {
     backgroundColor: bg,
-    scale: 2, // ความละเอียดสูงขึ้น อ่านง่ายบนจอมือถือ
+    scale,
     useCORS: true,
     logging: false,
+    width,
+    height,
+    windowWidth: width,
+    windowHeight: height,
+    scrollX: 0,
+    scrollY: 0,
+    // บน element ที่ clone: ตั้งพื้นหลังทึบ + ปลดการตัด overflow ให้เห็นเนื้อหาครบ
+    onclone: (_doc, element) => {
+      element.style.background = bg;
+      element.style.overflow = 'visible';
+      element.style.maxHeight = 'none';
+      element.style.height = 'auto';
+      element.querySelectorAll<HTMLElement>('*').forEach((node) => {
+        const cs = getComputedStyle(node);
+        if (cs.overflow !== 'visible' || cs.maxHeight !== 'none') {
+          node.style.overflow = 'visible';
+          node.style.maxHeight = 'none';
+        }
+      });
+    },
   });
+
+  // กันกรณีได้ canvas ว่าง (0 px) จริงๆ -> โยน error ให้ชั้นบน alert แจ้งผู้ใช้
+  if (!canvas.width || !canvas.height) {
+    throw new Error('html2canvas produced an empty canvas');
+  }
+
   return new Promise<Blob>((resolve, reject) => {
     canvas.toBlob(
       (blob) => (blob ? resolve(blob) : reject(new Error('toBlob failed'))),

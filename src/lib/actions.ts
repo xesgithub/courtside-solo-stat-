@@ -7,10 +7,6 @@ export interface ActionDef {
   label: string;
   sub?: string;
   tone: ActionTone;
-  /** ยิงเข้า -> เด้ง popup ถาม assist */
-  asksAssist?: boolean;
-  /** ยิงพลาด -> เด้ง popup ถาม rebound */
-  asksRebound?: boolean;
   /** ปุ่มหลักที่กดบ่อย (ยิง 2P/3P) แสดงใหญ่ แถวละ 2 */
   primary?: boolean;
   /** ปุ่มระดับกลาง (REB/AST/STL/BLK) แสดงเป็น grid แถวละ 4 ขนาดกลาง */
@@ -21,10 +17,10 @@ export interface ActionDef {
 
 /** ปุ่ม action ในหน้า Live (เรียงตามลำดับที่แสดง) */
 export const ACTIONS: ActionDef[] = [
-  { kind: 'FG2_MAKE', label: '2PT', sub: 'Make', tone: 'make', asksAssist: true, primary: true },
-  { kind: 'FG2_MISS', label: '2PT', sub: 'Miss', tone: 'miss', asksRebound: true, primary: true },
-  { kind: 'FG3_MAKE', label: '3PT', sub: 'Make', tone: 'make', asksAssist: true, primary: true },
-  { kind: 'FG3_MISS', label: '3PT', sub: 'Miss', tone: 'miss', asksRebound: true, primary: true },
+  { kind: 'FG2_MAKE', label: '2PT', sub: 'Make', tone: 'make', primary: true },
+  { kind: 'FG2_MISS', label: '2PT', sub: 'Miss', tone: 'miss', primary: true },
+  { kind: 'FG3_MAKE', label: '3PT', sub: 'Make', tone: 'make', primary: true },
+  { kind: 'FG3_MISS', label: '3PT', sub: 'Miss', tone: 'miss', primary: true },
   { kind: 'REB', label: 'REB', sub: 'Rebound', tone: 'neutral', mid: true },
   { kind: 'AST', label: 'AST', sub: 'Assist', tone: 'neutral', mid: true },
   { kind: 'STL', label: 'STL', sub: 'Steal', tone: 'neutral', mid: true },

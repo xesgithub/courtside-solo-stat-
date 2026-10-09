@@ -8,6 +8,10 @@ interface Props {
   onReorder: (fromId: string, toId: string) => void;
   /** ปักหมุด/ถอนหมุด (ไม่ส่ง = ล็อกอยู่ pin ไม่ได้) */
   onTogglePin?: (id: string) => void;
+  /** id ผู้เล่นที่เพิ่งบันทึก event — flash สั้นๆ ยืนยัน */
+  flashId?: string | null;
+  /** true = มี action ค้างรออยู่ รอผู้ใช้แตะคน (ทำให้การ์ดดูเชิญชวนให้แตะ) */
+  awaitingPick?: boolean;
 }
 
 // ต้องขยับเกินระยะนี้ถึงนับว่าเป็น "ลาก" ไม่งั้นถือเป็น "แตะเลือก"
@@ -19,6 +23,8 @@ export function PlayerList({
   onSelect,
   onReorder,
   onTogglePin,
+  flashId,
+  awaitingPick,
 }: Props) {
   const [dragId, setDragId] = useState<string | null>(null);
   const [overId, setOverId] = useState<string | null>(null);
@@ -98,7 +104,7 @@ export function PlayerList({
 
   return (
     <div
-      className="player-grid"
+      className={'player-grid' + (awaitingPick ? ' player-grid--awaiting' : '')}
       ref={gridRef}
       onPointerMove={onPointerMove}
       onPointerUp={endDrag}
@@ -116,7 +122,8 @@ export function PlayerList({
               (selectedId === p.id ? ' selected' : '') +
               (p.isStarter ? ' pinned' : '') +
               (overId === p.id && dragId !== p.id ? ' drop-target' : '') +
-              (dragId === p.id ? ' dragging' : '')
+              (dragId === p.id ? ' dragging' : '') +
+              (flashId === p.id ? ' flash-ok' : '')
             }
             onPointerDown={(e) => onPointerDown(e, p.id)}
             onKeyDown={(e) => {

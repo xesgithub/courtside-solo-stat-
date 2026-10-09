@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Game, Player, StatEvent } from '../types';
 import type { ActionDef } from '../lib/actions';
 import { PlayerList } from './PlayerList';
-import { ActionPad, type PickPrompt } from './ActionPad';
+import { ActionPad } from './ActionPad';
 import { ScorePanel } from './ScorePanel';
 import { TeamEditModal } from './TeamEditModal';
 
@@ -44,8 +44,10 @@ export function LivePage({
   onUndo,
 }: Props) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
-  const [prompt, setPrompt] = useState<PickPrompt | null>(null);
+  const [pendingAction, setPendingAction] = useState<ActionDef | null>(null);
   const [editing, setEditing] = useState(false);
+  // id ของ event ที่เพิ่งบันทึก (ไว้ flash ยืนยันบนการ์ด/ปุ่ม)
+  const [flashPlayerId, setFlashPlayerId] = useState<string | null>(null);
 
   const finished = !!game.finished;
 
@@ -58,33 +60,49 @@ export function LivePage({
     return [...pinned, ...rest];
   }, [game.players]);
 
+  /** flash สั้นๆ ยืนยันว่าบันทึก event ให้ผู้เล่นคนนี้แล้ว */
+  function triggerFlash(playerId: string) {
+    setFlashPlayerId(playerId);
+    window.setTimeout(() => {
+      setFlashPlayerId((cur) => (cur === playerId ? null : cur));
+    }, 450);
+  }
+
+  /** บันทึก event จริง ให้ผู้เล่นที่ระบุ */
+  function commit(action: ActionDef, playerId: string) {
+    onPushEvent({ kind: action.kind, playerId });
+    triggerFlash(playerId);
+  }
+
+  // กดปุ่ม action:
+  // - ถ้าเลือกคนไว้แล้ว -> บันทึกทันที
+  // - ถ้ายังไม่เลือกคน -> จำ action ไว้ (pending) รอเลือกคน (toggle ได้ถ้ากดซ้ำ)
   function handleAction(action: ActionDef) {
     if (finished) return;
-    if (!selectedPlayer) return;
-    onPushEvent({ kind: action.kind, playerId: selectedPlayer.id });
-    // ยิงลง/พลาด → เปิดแผงเลือกคน assist/rebound ฝั่งขวา (ไม่บังคับ)
-    if (action.asksAssist)
-      setPrompt({ mode: 'assist', shooterId: selectedPlayer.id });
-    else if (action.asksRebound)
-      setPrompt({ mode: 'rebound', shooterId: selectedPlayer.id });
-    else setPrompt(null);
-  }
-
-  function resolvePrompt(target: string | 'team') {
-    if (!prompt) return;
-    const kind = prompt.mode === 'assist' ? 'AST' : 'REB';
-    if (target === 'team') {
-      onPushEvent({ kind, isTeam: true });
+    if (selectedPlayer) {
+      commit(action, selectedPlayer.id);
     } else {
-      onPushEvent({ kind, playerId: target });
+      setPendingAction((cur) => (cur?.kind === action.kind ? null : action));
     }
-    setPrompt(null);
   }
 
-  // เลือกคนฝั่งซ้าย = ยกเลิกโหมดถาม แล้วเตรียม action ให้คนใหม่ (ไม่บังคับตอบ assist/rebound)
+  // เลือกคนทางซ้าย:
+  // - ถ้ามี action ค้างไว้ -> บันทึกทันทีให้คนนี้ แล้วเคลียร์ pending (ไม่ค้างเลือกคน)
+  // - ถ้าไม่มี -> toggle เลือก/ยกเลิกการเลือกคน (เตรียมกด action ต่อ)
   function handleSelectPlayer(id: string) {
-    setPrompt(null);
+    if (finished) return;
+    if (pendingAction) {
+      commit(pendingAction, id);
+      setPendingAction(null);
+      setSelectedId(null);
+      return;
+    }
     setSelectedId(id === selectedId ? null : id);
+  }
+
+  function handleClearSelection() {
+    setSelectedId(null);
+    setPendingAction(null);
   }
 
   return (
@@ -115,6 +133,8 @@ export function LivePage({
             onSelect={handleSelectPlayer}
             onReorder={onReorderPlayers}
             onTogglePin={finished ? undefined : onTogglePin}
+            flashId={flashPlayerId}
+            awaitingPick={!!pendingAction}
           />
         </section>
 
@@ -148,12 +168,8 @@ export function LivePage({
               <ActionPad
                 player={selectedPlayer}
                 onAction={handleAction}
-                onClose={() => setSelectedId(null)}
-                prompt={prompt}
-                players={game.players}
-                onPickPerson={(pid) => resolvePrompt(pid)}
-                onPickTeam={() => resolvePrompt('team')}
-                onSkipPrompt={() => setPrompt(null)}
+                onClose={handleClearSelection}
+                pendingAction={pendingAction}
               />
             )}
           </section>
