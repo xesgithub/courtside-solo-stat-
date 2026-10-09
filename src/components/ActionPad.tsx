@@ -60,7 +60,21 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
           ))}
         </div>
 
-        {/* Turnover — ปุ่มยาวเต็มแถว ถัดจาก 3PT */}
+        {/* REB/AST/STL/BLK — แถวเล็ก 4 ปุ่ม (อยู่บน ถัดจาก 2PT/3PT) */}
+        <div className="action-grid action-grid--quick">
+          {quickActions.map((a) => (
+            <button
+              key={a.kind}
+              className={btnClass(a, 'action-btn action-btn--mid')}
+              onClick={() => onAction(a)}
+            >
+              <span className="action-btn__label">{a.label}</span>
+              {a.sub && <span className="action-btn__sub">{a.sub}</span>}
+            </button>
+          ))}
+        </div>
+
+        {/* Turnover — ปุ่มยาวเต็มแถว */}
         <div className="action-grid action-grid--wide">
           {wideActions.map((a) => (
             <button
@@ -76,20 +90,6 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
         {/* Foul +/− และ FT ✓/✗ — grid 2×2 */}
         <div className="action-grid action-grid--foul">
           {foulActions.map((a) => (
-            <button
-              key={a.kind}
-              className={btnClass(a, 'action-btn action-btn--mid')}
-              onClick={() => onAction(a)}
-            >
-              <span className="action-btn__label">{a.label}</span>
-              {a.sub && <span className="action-btn__sub">{a.sub}</span>}
-            </button>
-          ))}
-        </div>
-
-        {/* REB/AST/STL/BLK — แถวเล็ก 4 ปุ่ม */}
-        <div className="action-grid action-grid--quick">
-          {quickActions.map((a) => (
             <button
               key={a.kind}
               className={btnClass(a, 'action-btn action-btn--mid')}
