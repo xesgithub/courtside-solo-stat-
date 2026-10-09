@@ -7,31 +7,31 @@ export interface ActionDef {
   label: string;
   sub?: string;
   tone: ActionTone;
-  /** ปุ่มหลักที่กดบ่อย (ยิง 2P/3P) แสดงใหญ่ แถวละ 2 */
-  primary?: boolean;
-  /** ปุ่มระดับกลาง (REB/AST/STL/BLK) แสดงเป็น grid แถวละ 4 ขนาดกลาง */
-  mid?: boolean;
-  /** ปุ่มรอง (TO/PF/FT) แสดงเป็นแถบเล็กข้างชื่อผู้เล่นใน ActionPad */
-  quick?: boolean;
+  /** กลุ่มการแสดงผลในหน้า Live:
+   *  - primary: ยิง 2P/3P (grid 2×2 ใหญ่สุด)
+   *  - wide: ปุ่มยาวเต็มแถว (TO)
+   *  - foul: Foul+/Foul−/FT✓/FT✗ (grid 2×2)
+   *  - quick: REB/AST/STL/BLK (แถวเล็ก) */
+  group: 'primary' | 'wide' | 'foul' | 'quick';
   /** กดแล้วต้องเลือกจำนวนแต้ม (1/2/3) ก่อนบันทึก — ใช้กับฟาวล์ที่ได้/เสียแต้มทันที */
   asksPoints?: boolean;
 }
 
 /** ปุ่ม action ในหน้า Live (เรียงตามลำดับที่แสดง) */
 export const ACTIONS: ActionDef[] = [
-  { kind: 'FG2_MAKE', label: '2PT', sub: 'Make', tone: 'make', primary: true },
-  { kind: 'FG2_MISS', label: '2PT', sub: 'Miss', tone: 'miss', primary: true },
-  { kind: 'FG3_MAKE', label: '3PT', sub: 'Make', tone: 'make', primary: true },
-  { kind: 'FG3_MISS', label: '3PT', sub: 'Miss', tone: 'miss', primary: true },
-  { kind: 'REB', label: 'REB', sub: 'Rebound', tone: 'neutral', mid: true },
-  { kind: 'AST', label: 'AST', sub: 'Assist', tone: 'neutral', mid: true },
-  { kind: 'STL', label: 'STL', sub: 'Steal', tone: 'neutral', mid: true },
-  { kind: 'BLK', label: 'BLK', sub: 'Block', tone: 'neutral', mid: true },
-  { kind: 'TO', label: 'Turnover', sub: 'Turnover', tone: 'neutral', quick: true },
-  { kind: 'FOUL_DRAWN', label: 'Foul +', sub: 'โดนฟาวล์ ได้แต้ม', tone: 'make', asksPoints: true, quick: true },
-  { kind: 'PF', label: 'Foul −', sub: 'ทำฟาวล์ เสียแต้ม', tone: 'foul', asksPoints: true, quick: true },
-  { kind: 'FT_MAKE', label: 'FT ✓', sub: 'Free throw make', tone: 'make', quick: true },
-  { kind: 'FT_MISS', label: 'FT ✗', sub: 'Free throw miss', tone: 'miss', quick: true },
+  { kind: 'FG2_MAKE', label: '2PT', sub: 'Make', tone: 'make', group: 'primary' },
+  { kind: 'FG2_MISS', label: '2PT', sub: 'Miss', tone: 'miss', group: 'primary' },
+  { kind: 'FG3_MAKE', label: '3PT', sub: 'Make', tone: 'make', group: 'primary' },
+  { kind: 'FG3_MISS', label: '3PT', sub: 'Miss', tone: 'miss', group: 'primary' },
+  { kind: 'TO', label: 'Turnover', sub: 'Turnover', tone: 'neutral', group: 'wide' },
+  { kind: 'FOUL_DRAWN', label: 'Foul +', sub: 'โดนฟาวล์ ได้แต้ม', tone: 'make', asksPoints: true, group: 'foul' },
+  { kind: 'PF', label: 'Foul −', sub: 'ทำฟาวล์ เสียแต้ม', tone: 'foul', asksPoints: true, group: 'foul' },
+  { kind: 'FT_MAKE', label: 'FT ✓', sub: 'Free throw make', tone: 'make', group: 'foul' },
+  { kind: 'FT_MISS', label: 'FT ✗', sub: 'Free throw miss', tone: 'miss', group: 'foul' },
+  { kind: 'REB', label: 'REB', sub: 'Rebound', tone: 'neutral', group: 'quick' },
+  { kind: 'AST', label: 'AST', sub: 'Assist', tone: 'neutral', group: 'quick' },
+  { kind: 'STL', label: 'STL', sub: 'Steal', tone: 'neutral', group: 'quick' },
+  { kind: 'BLK', label: 'BLK', sub: 'Block', tone: 'neutral', group: 'quick' },
 ];
 
 export const STAT_LABEL: Record<StatKind, string> = {

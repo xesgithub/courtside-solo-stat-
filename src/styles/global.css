@@ -2206,8 +2206,31 @@ button {
 }
 
 /* ---- ปุ่มรอง (TO/PF/FT) ตอนยังไม่เลือกคน แสดงเป็น grid เหมือน mid ---- */
+/* Turnover — ปุ่มยาวเต็มแถว (1 คอลัมน์) ถัดจาก 3PT */
+.action-grid--wide {
+  grid-template-columns: 1fr;
+  grid-auto-rows: minmax(44px, auto);
+  flex: 0 0 auto;
+}
+.action-btn--wide {
+  flex-direction: row;
+}
+.action-btn--wide .action-btn__label {
+  font-size: 16px;
+}
+
+/* Foul +/− และ FT ✓/✗ — grid 2×2 */
+.action-grid--foul {
+  grid-template-columns: repeat(2, 1fr);
+  grid-auto-rows: minmax(52px, 1fr);
+  flex: 4;
+}
+
+/* REB/AST/STL/BLK — แถวเล็ก 4 ปุ่ม */
 .action-grid--quick {
-  margin-top: 2px;
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: minmax(48px, 1fr);
+  flex: 3;
 }
 
 /* ---- พื้นหลังทึบของพื้นที่ capture (กัน html2canvas ได้ภาพโปร่ง = จอดำ) ---- */

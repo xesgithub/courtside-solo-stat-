@@ -10,13 +10,17 @@ interface Props {
   pendingAction: ActionDef | null;
 }
 
-const primaryActions = ACTIONS.filter((a) => a.primary);
-const midActions = ACTIONS.filter((a) => a.mid);
-const quickActions = ACTIONS.filter((a) => a.quick);
+const primaryActions = ACTIONS.filter((a) => a.group === 'primary');
+const wideActions = ACTIONS.filter((a) => a.group === 'wide');
+const foulActions = ACTIONS.filter((a) => a.group === 'foul');
+const quickActions = ACTIONS.filter((a) => a.group === 'quick');
 
 export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
   // ปุ่มกดได้เสมอ แม้ยังไม่เลือกคน (เลือก action ก่อนแล้วค่อยเลือกคนได้)
   const isPending = (a: ActionDef) => pendingAction?.kind === a.kind;
+
+  const btnClass = (a: ActionDef, base: string) =>
+    base + ' stat-' + a.kind + ' ' + a.tone + (isPending(a) ? ' is-pending' : '');
 
   return (
     <div className="action-pad">
@@ -42,15 +46,12 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
       </div>
 
       <div className="action-groups">
-        {/* ปุ่มหลัก: ยิง 2P/3P — แถวละ 2 ปุ่มใหญ่สุด */}
+        {/* ปุ่มยิงหลัก 2PT/3PT — grid 2×2 ใหญ่สุด */}
         <div className="action-grid action-grid--primary">
           {primaryActions.map((a) => (
             <button
               key={a.kind}
-              className={
-                'action-btn action-btn--primary ' + a.tone +
-                (isPending(a) ? ' is-pending' : '')
-              }
+              className={btnClass(a, 'action-btn action-btn--primary')}
               onClick={() => onAction(a)}
             >
               <span className="action-btn__label">{a.label}</span>
@@ -59,15 +60,25 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
           ))}
         </div>
 
-        {/* ปุ่มระดับกลาง: REB/AST/STL/BLK — แถวละ 4 ขนาดกลาง */}
-        <div className="action-grid action-grid--mid">
-          {midActions.map((a) => (
+        {/* Turnover — ปุ่มยาวเต็มแถว ถัดจาก 3PT */}
+        <div className="action-grid action-grid--wide">
+          {wideActions.map((a) => (
             <button
               key={a.kind}
-              className={
-                'action-btn action-btn--mid stat-' + a.kind + ' ' + a.tone +
-                (isPending(a) ? ' is-pending' : '')
-              }
+              className={btnClass(a, 'action-btn action-btn--wide')}
+              onClick={() => onAction(a)}
+            >
+              <span className="action-btn__label">{a.label}</span>
+            </button>
+          ))}
+        </div>
+
+        {/* Foul +/− และ FT ✓/✗ — grid 2×2 */}
+        <div className="action-grid action-grid--foul">
+          {foulActions.map((a) => (
+            <button
+              key={a.kind}
+              className={btnClass(a, 'action-btn action-btn--mid')}
               onClick={() => onAction(a)}
             >
               <span className="action-btn__label">{a.label}</span>
@@ -76,16 +87,12 @@ export function ActionPad({ player, onAction, onClose, pendingAction }: Props) {
           ))}
         </div>
 
-        {/* ปุ่มรอง (TO/Foul+/Foul−/FT) — อยู่ตำแหน่งเดิมเสมอ ไม่ว่าจะเลือกคนหรือยัง
-            (กันปุ่มเด้งสลับที่เวลาเลือก/ยกเลิกการเลือกคน) */}
+        {/* REB/AST/STL/BLK — แถวเล็ก 4 ปุ่ม */}
         <div className="action-grid action-grid--quick">
           {quickActions.map((a) => (
             <button
               key={a.kind}
-              className={
-                'action-btn action-btn--mid stat-' + a.kind + ' ' + a.tone +
-                (isPending(a) ? ' is-pending' : '')
-              }
+              className={btnClass(a, 'action-btn action-btn--mid')}
               onClick={() => onAction(a)}
             >
               <span className="action-btn__label">{a.label}</span>
