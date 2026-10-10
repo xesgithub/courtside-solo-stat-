@@ -10,7 +10,7 @@ export interface ActionDef {
   /** กลุ่มการแสดงผลในหน้า Live:
    *  - primary: ยิง 2P/3P (grid 2×2 ใหญ่สุด)
    *  - wide: ปุ่มยาวเต็มแถว (TO)
-   *  - foul: Foul+/Foul− (grid 2 ปุ่ม)
+   *  - foul: Foul (ทีมเราทำฟาวล์ -> คู่แข่งได้แต้ม, ปุ่มเดียว)
    *  - ft: FT✓/FT✗ (grid 2 ปุ่ม)
    *  - quick: REB/AST/STL/BLK (แถวเล็ก ข้างชื่อตอนเลือกคน) */
   group: 'primary' | 'wide' | 'foul' | 'ft' | 'quick';
@@ -25,8 +25,9 @@ export const ACTIONS: ActionDef[] = [
   { kind: 'FG3_MAKE', label: '3PT', sub: 'Make', tone: 'make', group: 'primary' },
   { kind: 'FG3_MISS', label: '3PT', sub: 'Miss', tone: 'miss', group: 'primary' },
   { kind: 'TO', label: 'Turnover', sub: 'Turnover', tone: 'neutral', group: 'wide' },
-  { kind: 'FOUL_DRAWN', label: 'Foul +', sub: 'โดนฟาวล์ ได้แต้ม', tone: 'make', asksPoints: true, group: 'foul' },
-  { kind: 'PF', label: 'Foul −', sub: 'ทำฟาวล์ เสียแต้ม', tone: 'foul', asksPoints: true, group: 'foul' },
+  // ฟาวล์: ปุ่มเดียว = "ทีมเราทำฟาวล์" -> คู่แข่งได้ 1-3 แต้มทันที (กติกาสนาม)
+  //   + นับ PF ของผู้เล่นเรา  (ส่วน "คู่แข่งทำฟาวล์เรา" ให้กด FT เอาแทน)
+  { kind: 'PF', label: 'Foul', sub: 'ทำฟาวล์ — คู่แข่งได้แต้ม', tone: 'foul', asksPoints: true, group: 'foul' },
   { kind: 'FT_MAKE', label: 'FT ✓', sub: 'Free throw make', tone: 'make', group: 'ft' },
   { kind: 'FT_MISS', label: 'FT ✗', sub: 'Free throw miss', tone: 'miss', group: 'ft' },
   { kind: 'REB', label: 'REB', sub: 'Rebound', tone: 'neutral', group: 'quick' },

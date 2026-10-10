@@ -113,7 +113,7 @@ export function ActionPad({
           ))}
         </div>
 
-        {/* Foul +/− — grid 2 ปุ่ม */}
+        {/* Foul — ทีมเราทำฟาวล์ -> คู่แข่งได้แต้ม (ปุ่มเดียว) */}
         <div className="action-grid action-grid--foul">
           {foulActions.map((a) => (
             <button

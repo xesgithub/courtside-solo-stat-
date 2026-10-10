@@ -286,6 +286,8 @@ function PointsPromptModal({
   onPick: (points: number) => void;
   onClose: () => void;
 }) {
+  // ตอนนี้มีเฉพาะเคส PF (ทีมเราทำฟาวล์ -> คู่แข่งได้แต้ม)
+  // เผื่ออนาคตมีเคส "ได้แต้ม" กลับมา ยังเช็ก FOUL_DRAWN ไว้
   const isGain = action.kind === 'FOUL_DRAWN';
   return (
     <div className="modal-overlay" onClick={onClose}>
@@ -310,7 +312,7 @@ function PointsPromptModal({
               className={'points-prompt__btn ' + (isGain ? 'is-gain' : 'is-loss')}
               onClick={() => onPick(n)}
             >
-              {isGain ? '+' : '−'}
+              {isGain ? '+' : '+'}
               {n}
             </button>
           ))}
