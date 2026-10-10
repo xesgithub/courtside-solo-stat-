@@ -15,7 +15,6 @@ interface Props {
 }
 
 const primaryActions = ACTIONS.filter((a) => a.group === 'primary');
-const wideActions = ACTIONS.filter((a) => a.group === 'wide');
 const foulActions = ACTIONS.filter((a) => a.group === 'foul');
 const ftActions = ACTIONS.filter((a) => a.group === 'ft');
 const quickActions = ACTIONS.filter((a) => a.group === 'quick');
@@ -100,20 +99,7 @@ export function ActionPad({
           ))}
         </div>
 
-        {/* Turnover — ปุ่มยาวเต็มแถว */}
-        <div className="action-grid action-grid--wide">
-          {wideActions.map((a) => (
-            <button
-              key={btnKey(a)}
-              className={btnClass(a, 'action-btn action-btn--wide')}
-              onClick={() => onAction(a)}
-            >
-              <span className="action-btn__label">{a.label}</span>
-            </button>
-          ))}
-        </div>
-
-        {/* Foul — ทีมเราทำฟาวล์ -> คู่แข่งได้แต้ม (ปุ่มเดียว) */}
+        {/* TO + Foul — grid 2 ปุ่ม (TO ซ้าย, Foul ขวา) */}
         <div className="action-grid action-grid--foul">
           {foulActions.map((a) => (
             <button

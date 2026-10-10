@@ -24,7 +24,9 @@ export const ACTIONS: ActionDef[] = [
   { kind: 'FG2_MISS', label: '2PT', sub: 'Miss', tone: 'miss', group: 'primary' },
   { kind: 'FG3_MAKE', label: '3PT', sub: 'Make', tone: 'make', group: 'primary' },
   { kind: 'FG3_MISS', label: '3PT', sub: 'Miss', tone: 'miss', group: 'primary' },
-  { kind: 'TO', label: 'Turnover', sub: 'Turnover', tone: 'neutral', group: 'wide' },
+  // แถว TO + Foul (grid 2 ปุ่ม) — TO ซ้าย, Foul ขวา
+  //   TO ใช้บ่อยกว่า Foul มาก (จาก log) แต่วางกว้างเท่ากันเพื่อตำแหน่งคาดเดาง่าย
+  { kind: 'TO', label: 'TO', sub: 'Turnover', tone: 'neutral', group: 'foul' },
   // ฟาวล์: ปุ่มเดียว = "ทีมเราทำฟาวล์" -> คู่แข่งได้ 1-3 แต้มทันที (กติกาสนาม)
   //   + นับ PF ของผู้เล่นเรา  (ส่วน "คู่แข่งทำฟาวล์เรา" ให้กด FT เอาแทน)
   { kind: 'PF', label: 'Foul', sub: 'ทำฟาวล์ — คู่แข่งได้แต้ม', tone: 'foul', asksPoints: true, group: 'foul' },
