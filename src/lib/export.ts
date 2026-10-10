@@ -55,7 +55,6 @@ export function buildBoxScoreCsv(
     'BLK',
     'TO',
     'PF',
-    'FD',
   ];
   lines.push(csvRow(header));
 
@@ -78,7 +77,6 @@ export function buildBoxScoreCsv(
       l.blk,
       l.to,
       l.pf,
-      l.fd,
     ]);
 
   // แถวผู้เล่น

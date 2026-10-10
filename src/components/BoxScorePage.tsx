@@ -143,7 +143,6 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
         <td>{line.blk}</td>
         <td>{line.to}</td>
         <td className="col-pf">{line.pf}</td>
-        <td className="col-fd">{line.fd}</td>
       </tr>
     );
   }
@@ -242,7 +241,6 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                 <th>BLK</th>
                 <th>TO</th>
                 <th>PF</th>
-                <th title="Foul drawn (โดนฟาวล์ได้แต้ม)">FD</th>
               </tr>
             </thead>
             <tbody>
@@ -293,7 +291,6 @@ export function BoxScorePage({ game, archived = false, onBack, onResume }: Props
                     <td>{line.blk}</td>
                     <td>{line.to}</td>
                     <td className="col-pf">{line.pf}</td>
-                    <td className="col-fd">{line.fd}</td>
                   </tr>
                 );
               })}
